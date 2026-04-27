@@ -1,17 +1,6 @@
 # @gaia-react/lint
 
-GAIA's opinionated lint configuration. Engine-neutral name; currently powered
-by ESLint flat config — Biome-ready in spirit, not yet in implementation.
-
-## Why the name doesn't say `eslint`
-
-This package may swap its underlying engine in the future (most likely Biome,
-though nothing is committed) without forcing every consumer to rewrite their
-config. The public name is `@gaia-react/lint`, the import path is
-`@gaia-react/lint`, and the named exports describe **what** they lint
-(`base`, `react`, `testing`, etc.) rather than **how** the linting runs.
-A future `@gaia-react/lint` v2 could replace ESLint with Biome under the hood
-and consumer import lines would not change.
+GAIA's lint configuration.
 
 ## Install
 

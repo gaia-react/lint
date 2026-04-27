@@ -1,6 +1,6 @@
 {
   "name": "@gaia-react/lint",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "GAIA's opinionated lint configuration. Engine-neutral name; currently powered by ESLint flat config.",
   "type": "module",
   "main": "./dist/index.js",
