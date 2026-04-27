@@ -32,7 +32,10 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm to a Trusted-Publishing-capable version (>=11.5.1)
-        run: npm install -g npm@latest
+        # `--force` avoids the well-known MODULE_NOT_FOUND from npm's
+        # self-upgrade rebuild step (e.g. promise-retry). The new npm
+        # is staged and the old one's deps stay intact until swap.
+        run: npm install -g npm@latest --force
 
       - run: pnpm install --frozen-lockfile
 
