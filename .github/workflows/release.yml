@@ -27,15 +27,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Node 24 ships npm 11+, which has the OIDC token exchange
+          # required for npm Trusted Publishing. Node 22 ships npm 10
+          # and that bundled npm has a self-upgrade regression that
+          # prevents installing a newer npm at runtime.
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-
-      - name: Upgrade npm to a Trusted-Publishing-capable version (>=11.5.1)
-        # `--force` avoids the well-known MODULE_NOT_FOUND from npm's
-        # self-upgrade rebuild step (e.g. promise-retry) when modules
-        # unload mid-install.
-        run: npm install -g npm@latest --force
 
       - run: pnpm install --frozen-lockfile
 
