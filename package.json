@@ -1,0 +1,68 @@
+{
+  "name": "@gaia-react/lint",
+  "version": "0.1.0",
+  "description": "GAIA's opinionated lint configuration. Engine-neutral name; currently powered by ESLint flat config.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 src",
+    "prepublishOnly": "pnpm typecheck && pnpm lint && pnpm build"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0 || ^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "prettier": {
+      "optional": true
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.39.0",
+    "tsup": "^8.0.0",
+    "typescript": "^6.0.0"
+  },
+  "author": "Steven Sacks <stevensacks@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaia-react/lint.git"
+  },
+  "homepage": "https://github.com/gaia-react/lint#readme",
+  "bugs": {
+    "url": "https://github.com/gaia-react/lint/issues"
+  },
+  "keywords": [
+    "gaia",
+    "gaia-react",
+    "eslint",
+    "eslint-config",
+    "flat-config",
+    "react",
+    "typescript",
+    "lint"
+  ]
+}
