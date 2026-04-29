@@ -258,6 +258,26 @@ const preferArrowFunctionsConfig: Linter.Config[] = [
     },
   },
   {
+    // `prefer-arrow-functions` has a hardcoded exemption for named
+    // default-exported declarations (`guard.js:hasNameAndIsExportedAsDefaultExport`),
+    // so `export default function Foo() {}` slips through. This selector closes
+    // that gap. Convert to `const Foo = () => {}; export default Foo;` instead.
+    // `.d.ts` is ignored because ambient `export default function …(): T;`
+    // declarations have no body to convert.
+    ignores: ['**/*.d.ts'],
+    name: 'prefer-arrow/no-default-exported-function',
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          message:
+            'Use `const Name = () => {}; export default Name;` instead. The prefer-arrow-functions plugin exempts named default-exported declarations upstream.',
+          selector: 'ExportDefaultDeclaration > FunctionDeclaration',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.d.ts'],
     name: 'ts-definition-files/prefer-arrow-off',
     rules: {
