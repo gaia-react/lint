@@ -13,5 +13,12 @@ export const playwright: Linter.Config[] = [
     name: 'playwright',
     ...(playwrightPlugin.configs['flat/recommended'] as Linter.Config),
     files: ['.playwright/**/*.ts?(x)'],
+    rules: {
+      ...playwrightPlugin.configs['flat/recommended'].rules,
+      'playwright/expect-expect': [
+        'warn',
+        {assertFunctionPatterns: ['^expect[A-Z]']},
+      ],
+    },
   },
 ];

@@ -12,7 +12,11 @@ import type {Linter} from 'eslint';
  */
 export const testing: Linter.Config[] = [
   {
-    files: ['*.test.ts?(x)', '*.stories.ts?(x)', 'test/**/*.ts?(x)'],
+    files: [
+      '**/*.test.ts?(x)',
+      '**/*.stories.ts?(x)',
+      'test/**/*.ts?(x)',
+    ],
     name: 'vitest',
     plugins: {
       'jest-dom': jestDom,
@@ -24,6 +28,10 @@ export const testing: Linter.Config[] = [
       'import-x/no-useless-path-segments': [
         'error',
         {noUselessIndex: true},
+      ],
+      'vitest/expect-expect': [
+        'error',
+        {assertFunctionNames: ['expect', 'expect*']},
       ],
     },
   },
