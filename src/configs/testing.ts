@@ -21,6 +21,10 @@ export const testing: Linter.Config[] = [
     rules: {
       ...jestDom.configs['flat/recommended'].rules,
       ...vitest.configs.recommended.rules,
+      'import-x/no-useless-path-segments': [
+        'error',
+        {noUselessIndex: true},
+      ],
     },
   },
   {
