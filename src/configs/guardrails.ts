@@ -2,6 +2,7 @@ import type {Linter} from 'eslint';
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
 import sonarjs from 'eslint-plugin-sonarjs';
 import noEnumPlugin from '../plugins/no-enum.js';
+import noJsxIifePlugin from '../plugins/no-jsx-iife.js';
 import noSwitchPlugin from '../plugins/no-switch.js';
 
 const sonarConfig: Linter.Config[] = [
@@ -56,6 +57,15 @@ const noEnumConfig: Linter.Config[] = [
   },
 ];
 
+const noJsxIifeConfig: Linter.Config[] = [
+  {
+    files: ['**/*.tsx', '**/*.jsx'],
+    name: 'no-jsx-iife',
+    plugins: {'no-jsx-iife': noJsxIifePlugin},
+    rules: {'no-jsx-iife/no-jsx-iife': 'error'},
+  },
+];
+
 const noSwitchConfig: Linter.Config[] = [
   {
     files: ['**/*.ts?(x)', '**/*.js?(x)'],
@@ -88,6 +98,7 @@ const noRelativeImportPathsConfig: Linter.Config[] = [
 export const guardrails: Linter.Config[] = [
   ...sonarConfig,
   ...noEnumConfig,
+  ...noJsxIifeConfig,
   ...noSwitchConfig,
   ...noRelativeImportPathsConfig,
 ];
