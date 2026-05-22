@@ -1,5 +1,13 @@
 # @gaia-react/lint
 
+## 1.2.0
+
+### Minor Changes
+
+- [#12](https://github.com/gaia-react/lint/pull/12) [`6417611`](https://github.com/gaia-react/lint/commit/641761133e254a50c6b6a42ba5896b7a3eec0bcd) Thanks [@stevensacks](https://github.com/stevensacks)! - Add `no-jsx-iife` rule to `gaiaLint.guardrails`.
+
+  Flags IIFEs (`{(() => { ... })()}`) used inside JSX expression containers. These obscure intent and allocate a new function on every render. The rule errors on both arrow-function and regular-function callees inside a `JSXExpressionContainer`, scoped to `**/*.tsx` and `**/*.jsx` files. Fix by computing the value in a variable before the return statement, using an inline `&&` expression, or extracting a sub-component.
+
 ## 1.1.3
 
 ### Patch Changes
