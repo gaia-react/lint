@@ -41,7 +41,7 @@ export default defineConfig([
 | `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard                  | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
-| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions`          | required  |
+| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
 | `testing`        | `Linter.Config[]`                | Vitest + Testing Library config scoped to `*.test.*` and `test/`                                                                                  | optional  |
 | `storybook`      | `Linter.Config[]`                | `eslint-plugin-storybook` scoped to `*.stories.*`                                                                                                 | optional  |
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `e2e/`                                                                                                       | optional  |
@@ -129,7 +129,7 @@ Supported versions:
 
 ## Custom rules included
 
-Two rules are implemented inside this package and ship as part of
+Three rules are implemented inside this package and ship as part of
 `guardrails`.
 
 ### `no-enum`
@@ -171,6 +171,16 @@ Opt out for a file or block:
 
 ```js
 {files: ['src/parser/**'], rules: {'no-switch/no-switch': 'off'}}
+```
+
+### `no-jsx-iife`
+
+Forbids IIFEs (`{(() => { ... })()}`) inside JSX expression containers in `.tsx` and `.jsx` files. IIFEs obscure intent and allocate a new function on every render. Compute the value in a variable before the return statement, or use an inline `&&` expression instead.
+
+Opt out for a file or block:
+
+```js
+{files: ['src/legacy/**'], rules: {'no-jsx-iife/no-jsx-iife': 'off'}}
 ```
 
 ## Tailwind / better-tailwindcss factory
