@@ -5,7 +5,7 @@ import perfectionist from 'eslint-plugin-perfectionist';
 import unicorn from 'eslint-plugin-unicorn';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-const canonicalConfig: Linter.Config[] = [
+const buildCanonicalConfig = (sourceDir: string): Linter.Config[] => [
   canonical.configs['flat/recommended'] as Linter.Config,
   {
     name: 'canonical',
@@ -25,9 +25,9 @@ const canonicalConfig: Linter.Config[] = [
   },
   {
     files: [
-      'app/root.tsx',
-      'app/entry.server.tsx',
-      'app/**/tests/*',
+      `${sourceDir}/root.tsx`,
+      `${sourceDir}/entry.server.tsx`,
+      `${sourceDir}/**/tests/*`,
       'test/**/*.ts?(x)',
       '**/*.stories.tsx',
       '**/routes/**/*.tsx',
@@ -196,14 +196,14 @@ const unusedImportsConfig: Linter.Config[] = [
   },
 ];
 
-const checkFileConfig: Linter.Config[] = [
+const buildCheckFileConfig = (sourceDir: string): Linter.Config[] => [
   {
     plugins: {
       'check-file': checkFile,
     },
   },
   {
-    files: ['app/**/*'],
+    files: [`${sourceDir}/**/*`],
     name: 'check-file',
     rules: {
       'check-file/filename-naming-convention': [
@@ -211,14 +211,14 @@ const checkFileConfig: Linter.Config[] = [
         {
           // React hook files must be camelCase (to match the hook name)
           '**/hooks/*.{ts,tsx}': 'CAMEL_CASE',
-          'app/state/*.tsx': 'KEBAB_CASE',
+          [`${sourceDir}/state/*.tsx`]: 'KEBAB_CASE',
           // React component files must be named index.tsx
-          'app/{components,pages}/**/!(assets|hooks|state|tests|utils)/*.tsx':
+          [`${sourceDir}/{components,pages}/**/!(assets|hooks|state|tests|utils)/*.tsx`]:
             'index+()',
           // Generally, non-component files must be named kebab-case
-          'app/{components,pages}/**/!(hooks)/*.ts': 'KEBAB_CASE',
+          [`${sourceDir}/{components,pages}/**/!(hooks)/*.ts`]: 'KEBAB_CASE',
           // Non-component files inside specific components folders must be kebab-case
-          'app/{components,pages}/**/(assets|state|tests|utils)/*.{ts,tsx}':
+          [`${sourceDir}/{components,pages}/**/(assets|state|tests|utils)/*.{ts,tsx}`]:
             'KEBAB_CASE',
           'test/**/*.ts?(x)': 'KEBAB_CASE',
         },
@@ -230,14 +230,14 @@ const checkFileConfig: Linter.Config[] = [
         'error',
         {
           // require stories and test files to be inside tests folders
-          '*.(stories|test).{ts,tsx}': 'app/**/tests/',
+          '*.(stories|test).{ts,tsx}': `${sourceDir}/**/tests/`,
         },
       ],
       'check-file/folder-naming-convention': [
         'error',
         {
           // enforce PascalCase component folders, and allow assets, hooks, tests, and utils subfolders
-          'app/components/**/':
+          [`${sourceDir}/components/**/`]:
             '(assets|hooks|state|tests|utils|[A-Z][a-zA-Z0-9]*)',
         },
       ],
@@ -260,10 +260,10 @@ const checkFileConfig: Linter.Config[] = [
   },
 ];
 
-export const styleHygiene: Linter.Config[] = [
-  ...canonicalConfig,
+export const buildStyleHygiene = (sourceDir: string): Linter.Config[] => [
+  ...buildCanonicalConfig(sourceDir),
   ...perfectionistConfig,
   ...unicornConfig,
   ...unusedImportsConfig,
-  ...checkFileConfig,
+  ...buildCheckFileConfig(sourceDir),
 ];

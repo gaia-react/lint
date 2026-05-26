@@ -17,26 +17,47 @@ verbatim and adjust the override block at the bottom for your project.
 import gaiaLint from '@gaia-react/lint';
 import {defineConfig} from 'eslint/config';
 
+const lint = gaiaLint();
+
 export default defineConfig([
-  ...gaiaLint.ignores({gitignore: '.gitignore'}),
-  ...gaiaLint.base,
-  ...gaiaLint.react,
-  ...gaiaLint.testing,
-  ...gaiaLint.storybook,
-  ...gaiaLint.playwright,
-  ...gaiaLint.styleHygiene,
-  ...gaiaLint.guardrails,
-  ...gaiaLint.betterTailwind({
+  ...lint.ignores,
+  ...lint.base,
+  ...lint.react,
+  ...lint.testing,
+  ...lint.storybook,
+  ...lint.playwright,
+  ...lint.styleHygiene,
+  ...lint.guardrails,
+  ...lint.betterTailwind({
     entryPoint: './app/styles/tailwind.css',
     ignore: ['plain-link', 'plain-table'],
   }),
-  ...gaiaLint.prettier,
+  ...lint.prettier,
 ]);
 ```
 
-## Exports
+## Factory options
 
-| Export           | Shape                            | Includes                                                                                                                                          | Required? |
+`gaiaLint(opts?)` returns a bundle of config blocks. Call it once at the
+top of `eslint.config.mjs` and spread the returned configs into
+`defineConfig`.
+
+| Option      | Type     | Default | Description                                                                                                                                            |
+| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sourceDir` | `string` | `'app'` | Project source directory (relative to repo root). Used to scope filename conventions, hook-folder rules, and the `no-relative-import-paths` root path. |
+
+Non-GAIA projects that store source under `src/` (or any other path):
+
+```js
+const lint = gaiaLint({sourceDir: 'src'});
+```
+
+That single call rebinds `base`, `styleHygiene`, and `guardrails` to the
+new source root — no per-config override blocks needed.
+
+## Bundle shape
+
+| Property         | Shape                            | Includes                                                                                                                                          | Required? |
 | ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard                  | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
@@ -47,14 +68,7 @@ export default defineConfig([
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `e2e/`                                                                                                       | optional  |
 | `prettier`       | `Linter.Config[]`                | `eslint-config-prettier` — must be **last** to disable formatting rules                                                                           | required if using Prettier |
 | `betterTailwind` | `(opts) => Linter.Config[]`      | `eslint-plugin-better-tailwindcss` factory; takes `entryPoint` (path to Tailwind entry CSS) and optional `ignore` (class names to skip)           | optional  |
-| `ignores`        | `(opts?) => Linter.Config[]`     | `includeIgnoreFile` helper plus GAIA defaults; takes optional `gitignore` (path) and `extra` (string[])                                           | recommended |
-
-The default export bundles every named export:
-
-```js
-import gaiaLint from '@gaia-react/lint';
-// gaiaLint.base, gaiaLint.react, gaiaLint.betterTailwind({...}), ...
-```
+| `ignores`        | `Iterable<Linter.Config> & ((opts?) => Linter.Config[])` | `includeIgnoreFile` helper plus GAIA defaults. Spread directly for defaults (`...lint.ignores`) or call with options to override (`...lint.ignores({extra: ['.gaia/**']})`). | recommended |
 
 ## Override patterns
 
@@ -65,8 +79,8 @@ gaia-lint spreads to disable, change, or scope rules.
 
 ```js
 export default defineConfig([
-  ...gaiaLint.base,
-  ...gaiaLint.react,
+  ...lint.base,
+  ...lint.react,
   {rules: {'sonarjs/cognitive-complexity': 'off'}},
 ]);
 ```
@@ -75,8 +89,8 @@ export default defineConfig([
 
 ```js
 export default defineConfig([
-  ...gaiaLint.base,
-  ...gaiaLint.react,
+  ...lint.base,
+  ...lint.react,
   {
     files: ['app/legacy/**'],
     rules: {'sonarjs/cognitive-complexity': 'off'},
@@ -88,7 +102,7 @@ export default defineConfig([
 
 ```js
 export default defineConfig([
-  ...gaiaLint.base,
+  ...lint.base,
   {
     languageOptions: {
       parserOptions: {project: './tsconfig.eslint.json'},
@@ -103,8 +117,8 @@ export default defineConfig([
 import myPlugin from 'eslint-plugin-my-plugin';
 
 export default defineConfig([
-  ...gaiaLint.base,
-  ...gaiaLint.react,
+  ...lint.base,
+  ...lint.react,
   {
     plugins: {'my-plugin': myPlugin},
     rules: {'my-plugin/some-rule': 'error'},
@@ -189,7 +203,7 @@ Opt out for a file or block:
 where your Tailwind entry CSS file lives.
 
 ```js
-...gaiaLint.betterTailwind({
+...lint.betterTailwind({
   entryPoint: './app/styles/tailwind.css',
   ignore: ['plain-link', 'plain-table'],
 }),
@@ -203,37 +217,50 @@ where your Tailwind entry CSS file lives.
 ## Ignores factory
 
 `ignores` produces a leading flat-config block that merges your
-`.gitignore` plus GAIA defaults.
+`.gitignore` plus GAIA defaults. `.gitignore` is picked up automatically
+if it exists at the project root — no need to declare it.
+
+`lint.ignores` is dual-shape: spread it directly for the default case
+(no call), or call it with options to override.
 
 ```js
-...gaiaLint.ignores({
-  gitignore: '.gitignore',
-  extra: ['coverage/**', '**/*.generated.ts'],
-}),
+...lint.ignores,                                    // default: auto .gitignore + GAIA defaults
+...lint.ignores({extra: ['coverage/**']}),          // + extra globs
+...lint.ignores({gitignore: 'config/.gitignore'}),  // override the path
+...lint.ignores({gitignore: false}),                // opt out of the merge
 ```
 
-| Option     | Type       | Required | Description                                                                                          |
-| ---------- | ---------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `gitignore`| `string`   | no       | Path to a `.gitignore` file (relative to `cwd` or absolute). Patterns are merged via `includeIgnoreFile`. |
-| `extra`    | `string[]` | no       | Extra ignore globs merged with GAIA defaults.                                                        |
+| Option     | Type              | Required | Description                                                                                                                                                                  |
+| ---------- | ----------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gitignore`| `string \| false` | no       | Path to a `.gitignore` file (relative to `cwd` or absolute). Defaults to `'.gitignore'`. Silently skipped if the resolved path does not exist. Pass `false` to opt out entirely. |
+| `extra`    | `string[]`        | no       | Extra ignore globs merged with GAIA defaults.                                                                                                                                |
 
 ## GAIA folder conventions baked into `check-file`
 
-The `check-file` rules in `styleHygiene` encode GAIA's folder layout:
+The `check-file` rules in `styleHygiene` encode GAIA's folder layout (with
+`sourceDir` substituted for the literal `app/` prefix):
 
-- `app/components/**` — component file naming
-- `app/pages/**` — route/page file naming
-- `app/hooks/**` — hook file naming (`use-*.ts`)
+- `<sourceDir>/components/**` — component file naming
+- `<sourceDir>/pages/**` — route/page file naming
+- `<sourceDir>/hooks/**` — hook file naming (`use-*.ts`)
 - `test/**` — test harness naming
 
-If your project uses a different layout, override the relevant
-`check-file/*` rules **after** the `styleHygiene` spread:
+For most non-GAIA layouts, passing `sourceDir` to the factory is enough:
 
 ```js
+const lint = gaiaLint({sourceDir: 'src'});
+```
+
+If the convention itself differs (e.g. PascalCase component files instead
+of `index.tsx`), override the relevant `check-file/*` rules **after** the
+`styleHygiene` spread:
+
+```js
+const lint = gaiaLint({sourceDir: 'src'});
+
 export default defineConfig([
-  ...gaiaLint.base,
-  ...gaiaLint.styleHygiene,
-  // Project uses src/ instead of app/
+  ...lint.base,
+  ...lint.styleHygiene,
   {
     files: ['src/components/**'],
     rules: {

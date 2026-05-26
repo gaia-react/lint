@@ -1,53 +1,89 @@
-export {base} from './configs/base.js';
-export {react} from './configs/react.js';
-export {styleHygiene} from './configs/style-hygiene.js';
-export {guardrails} from './configs/guardrails.js';
-export {testing} from './configs/testing.js';
-export {storybook} from './configs/storybook.js';
-export {playwright} from './configs/playwright.js';
-export {prettier} from './configs/prettier.js';
-export {
+import type {Linter} from 'eslint';
+import {buildBase} from './configs/base.js';
+import {
   betterTailwind,
   type GaiaLintBetterTailwindOptions,
 } from './configs/better-tailwind.js';
-export {
-  ignores,
-  type GaiaLintIgnoresOptions,
-} from './configs/ignores.js';
-
-import {base} from './configs/base.js';
-import {react} from './configs/react.js';
-import {styleHygiene} from './configs/style-hygiene.js';
-import {guardrails} from './configs/guardrails.js';
-import {testing} from './configs/testing.js';
-import {storybook} from './configs/storybook.js';
+import {buildGuardrails} from './configs/guardrails.js';
+import {ignores, type GaiaLintIgnoresOptions} from './configs/ignores.js';
 import {playwright} from './configs/playwright.js';
 import {prettier} from './configs/prettier.js';
-import {betterTailwind} from './configs/better-tailwind.js';
-import {ignores} from './configs/ignores.js';
+import {react} from './configs/react.js';
+import {storybook} from './configs/storybook.js';
+import {buildStyleHygiene} from './configs/style-hygiene.js';
+import {testing} from './configs/testing.js';
 
-const gaiaLint: {
-  base: typeof base;
-  react: typeof react;
-  styleHygiene: typeof styleHygiene;
-  guardrails: typeof guardrails;
-  testing: typeof testing;
-  storybook: typeof storybook;
-  playwright: typeof playwright;
-  prettier: typeof prettier;
-  betterTailwind: typeof betterTailwind;
-  ignores: typeof ignores;
-} = {
-  base,
-  react,
-  styleHygiene,
-  guardrails,
-  testing,
-  storybook,
-  playwright,
-  prettier,
-  betterTailwind,
-  ignores,
+export type {GaiaLintBetterTailwindOptions, GaiaLintIgnoresOptions};
+
+export type GaiaLintOptions = {
+  /**
+   * Application source directory (relative to project root). Used to scope
+   * file-path-based rules — filename conventions, hook-folder scoping,
+   * `no-relative-import-paths` root, etc.
+   *
+   * @default 'app'
+   */
+  sourceDir?: string;
+};
+
+/**
+ * Dual-shape `ignores` accessor. Spread it directly for the default
+ * configuration (`...lint.ignores`) or call it to override
+ * (`...lint.ignores({extra: ['coverage/**']})`).
+ */
+export type GaiaLintIgnores = ((
+  opts?: GaiaLintIgnoresOptions,
+) => Linter.Config[]) &
+  Iterable<Linter.Config>;
+
+export type GaiaLintBundle = {
+  base: Linter.Config[];
+  betterTailwind: (opts: GaiaLintBetterTailwindOptions) => Linter.Config[];
+  guardrails: Linter.Config[];
+  ignores: GaiaLintIgnores;
+  playwright: Linter.Config[];
+  prettier: Linter.Config[];
+  react: Linter.Config[];
+  storybook: Linter.Config[];
+  styleHygiene: Linter.Config[];
+  testing: Linter.Config[];
+};
+
+const buildIgnoresAccessor = (): GaiaLintIgnores => {
+  const defaults = ignores();
+  const accessor = ((opts?: GaiaLintIgnoresOptions) => ignores(opts)) as
+    | ((opts?: GaiaLintIgnoresOptions) => Linter.Config[]) &
+        Iterable<Linter.Config> & {[Symbol.iterator]?: () => Iterator<Linter.Config>};
+  accessor[Symbol.iterator] = () => defaults[Symbol.iterator]();
+  return accessor as GaiaLintIgnores;
+};
+
+/**
+ * GAIA lint configuration factory.
+ *
+ * Call once at the top of your `eslint.config.mjs` to bind a `sourceDir`,
+ * then spread the returned configs into `defineConfig`. Defaults to GAIA's
+ * `'app'` layout; pass `{sourceDir: 'src'}` (or any other value) for
+ * projects that store source elsewhere.
+ *
+ * @example
+ * const lint = gaiaLint();                       // GAIA / app/
+ * const lint = gaiaLint({sourceDir: 'src'});     // src/
+ */
+const gaiaLint = (opts?: GaiaLintOptions): GaiaLintBundle => {
+  const sourceDir = opts?.sourceDir ?? 'app';
+  return {
+    base: buildBase(sourceDir),
+    betterTailwind,
+    guardrails: buildGuardrails(sourceDir),
+    ignores: buildIgnoresAccessor(),
+    playwright,
+    prettier,
+    react,
+    storybook,
+    styleHygiene: buildStyleHygiene(sourceDir),
+    testing,
+  };
 };
 
 export default gaiaLint;
