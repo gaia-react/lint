@@ -28,10 +28,7 @@ export default defineConfig([
   ...lint.playwright,
   ...lint.styleHygiene,
   ...lint.guardrails,
-  ...lint.betterTailwind({
-    entryPoint: './app/styles/tailwind.css',
-    ignore: ['plain-link', 'plain-table'],
-  }),
+  ...lint.betterTailwind({entryPoint: './app/styles/tailwind.css'}),
   ...lint.prettier,
 ]);
 ```
@@ -152,21 +149,6 @@ Forbids TypeScript `enum` declarations. Enums emit runtime code, are not
 tree-shakeable, conflate value and type space, and have well-known footguns
 around numeric vs string enums and reverse mappings. Use a `const` object
 plus a derived union type instead.
-
-```ts
-// flagged
-enum Status {
-  Active,
-  Inactive,
-}
-
-// preferred
-const Status = {
-  Active: 'active',
-  Inactive: 'inactive',
-} as const;
-type Status = (typeof Status)[keyof typeof Status];
-```
 
 Opt out for a file or block:
 
