@@ -1,10 +1,19 @@
-import {includeIgnoreFile} from '@eslint/compat';
-import path from 'node:path';
+import {includeIgnoreFile} from '@eslint/config-helpers';
 import type {Linter} from 'eslint';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export type GaiaLintIgnoresOptions = {
-  /** Path to a `.gitignore` file to merge in. Resolved from `process.cwd()` if relative. */
-  gitignore?: string;
+  /**
+   * Path to a `.gitignore` file to merge in. Resolved from `process.cwd()`
+   * if relative. Pass `false` to skip the gitignore merge entirely.
+   *
+   * If the resolved path does not exist, the merge is silently skipped —
+   * projects without a `.gitignore` don't need to opt out explicitly.
+   *
+   * @default '.gitignore'
+   */
+  gitignore?: string | false;
   /** Extra ignore globs to merge with GAIA defaults. */
   extra?: string[];
 };
@@ -38,11 +47,14 @@ const defaultIgnores = [
 export const ignores = (opts?: GaiaLintIgnoresOptions): Linter.Config[] => {
   const out: Linter.Config[] = [];
 
-  if (opts?.gitignore) {
-    const resolved = path.isAbsolute(opts.gitignore)
-      ? opts.gitignore
-      : path.resolve(process.cwd(), opts.gitignore);
-    out.push(includeIgnoreFile(resolved) as Linter.Config);
+  const gitignore = opts?.gitignore ?? '.gitignore';
+  if (gitignore !== false) {
+    const resolved = path.isAbsolute(gitignore)
+      ? gitignore
+      : path.resolve(process.cwd(), gitignore);
+    if (fs.existsSync(resolved)) {
+      out.push(includeIgnoreFile(resolved) as Linter.Config);
+    }
   }
 
   out.push({

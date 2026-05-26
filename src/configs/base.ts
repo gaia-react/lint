@@ -81,7 +81,7 @@ const typescriptConfig: Linter.Config[] = [
   },
 ];
 
-const tsEslintConfig: Linter.Config[] = [
+const buildTsEslintConfig = (sourceDir: string): Linter.Config[] => [
   {
     files: ['**/*.ts?(x)'],
     name: 'typescript/config',
@@ -123,14 +123,22 @@ const tsEslintConfig: Linter.Config[] = [
     },
   },
   {
-    files: ['app/hooks/**/*', 'app/routes/**/*', 'app/sessions.server/**/*'],
+    files: [
+      `${sourceDir}/hooks/**/*`,
+      `${sourceDir}/routes/**/*`,
+      `${sourceDir}/sessions.server/**/*`,
+    ],
     name: 'typescript/only-throw-error',
     rules: {
       '@typescript-eslint/only-throw-error': 'off',
     },
   },
   {
-    files: ['app/utils/**', 'app/services/**', 'app/hooks/**'],
+    files: [
+      `${sourceDir}/utils/**`,
+      `${sourceDir}/services/**`,
+      `${sourceDir}/hooks/**`,
+    ],
     name: 'typescript/explicit-return-types',
     rules: {
       '@typescript-eslint/explicit-module-boundary-types': 'error',
@@ -164,7 +172,7 @@ const tsEslintConfig: Linter.Config[] = [
   },
 ];
 
-const importXConfig: Linter.Config[] = [
+const buildImportXConfig = (sourceDir: string): Linter.Config[] => [
   {
     name: 'import-x-all-files',
     rules: {
@@ -203,14 +211,14 @@ const importXConfig: Linter.Config[] = [
     },
   },
   {
-    files: ['app/**/!(*.test|*.stories).ts?(x)'],
+    files: [`${sourceDir}/**/!(*.test|*.stories).ts?(x)`],
     name: 'import-x/app-test-files',
     rules: {
       'import-x/no-unresolved': 'error',
     },
   },
   {
-    files: ['app/**/hooks/*.ts?(x)'],
+    files: [`${sourceDir}/**/hooks/*.ts?(x)`],
     name: 'import-x/hooks',
     rules: {
       'import-x/no-default-export': 'error',
@@ -299,12 +307,12 @@ const lodashUnderscoreConfig: Linter.Config[] = [
   },
 ];
 
-export const base: Linter.Config[] = [
+export const buildBase = (sourceDir: string): Linter.Config[] => [
   ...jsConfig,
   ...jsCustomConfig,
   ...typescriptConfig,
-  ...tsEslintConfig,
-  ...importXConfig,
+  ...buildTsEslintConfig(sourceDir),
+  ...buildImportXConfig(sourceDir),
   ...eslintCommentsConfig,
   ...preferArrowFunctionsConfig,
   ...lodashUnderscoreConfig,

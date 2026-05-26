@@ -5,7 +5,7 @@ import noEnumPlugin from '../plugins/no-enum.js';
 import noJsxIifePlugin from '../plugins/no-jsx-iife.js';
 import noSwitchPlugin from '../plugins/no-switch.js';
 
-const sonarConfig: Linter.Config[] = [
+const buildSonarConfig = (sourceDir: string): Linter.Config[] => [
   sonarjs.configs!.recommended as Linter.Config,
   {
     name: 'sonarjs',
@@ -37,7 +37,7 @@ const sonarConfig: Linter.Config[] = [
     },
   },
   {
-    files: ['app/languages/**/*.ts', 'eslint.config.mjs'],
+    files: [`${sourceDir}/languages/**/*.ts`, 'eslint.config.mjs'],
     name: 'sonarjs/credential-checks',
     rules: {
       'sonarjs/no-hardcoded-credentials': 'off',
@@ -75,7 +75,9 @@ const noSwitchConfig: Linter.Config[] = [
   },
 ];
 
-const noRelativeImportPathsConfig: Linter.Config[] = [
+const buildNoRelativeImportPathsConfig = (
+  sourceDir: string,
+): Linter.Config[] => [
   {
     name: 'no-relative-import-paths',
     plugins: {
@@ -88,17 +90,17 @@ const noRelativeImportPathsConfig: Linter.Config[] = [
           allowedDepth: 2,
           allowSameFolder: true,
           prefix: '~',
-          rootDir: 'app',
+          rootDir: sourceDir,
         },
       ],
     },
   },
 ];
 
-export const guardrails: Linter.Config[] = [
-  ...sonarConfig,
+export const buildGuardrails = (sourceDir: string): Linter.Config[] => [
+  ...buildSonarConfig(sourceDir),
   ...noEnumConfig,
   ...noJsxIifeConfig,
   ...noSwitchConfig,
-  ...noRelativeImportPathsConfig,
+  ...buildNoRelativeImportPathsConfig(sourceDir),
 ];
