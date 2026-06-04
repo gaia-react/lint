@@ -75,6 +75,106 @@ const noSwitchConfig: Linter.Config[] = [
   },
 ];
 
+/**
+ * Architecture-boundary enforcement for GAIA's canonical `app/` layout.
+ *
+ * Imports may only flow from a higher layer to a lower one:
+ *
+ *   routes -> pages -> components -> { hooks, state } -> services -> utils -> types
+ *
+ * `types/` is a pure leaf importable by everyone. Each zone names a lower
+ * layer as `target` and the higher layers it must not import as `from`, so a
+ * lower-importing-higher edge (the wrong direction) is reported. `routes`
+ * appears in every `from` set, which encodes "nothing may import a route".
+ *
+ * Zone `target`/`from` paths resolve against `process.cwd()` (the consuming
+ * project's root where eslint runs), not this package's location in
+ * node_modules, so `./${sourceDir}/...` correctly points at the consumer's
+ * source tree. `import-x@4.16.2` accepts `from`/`target` as string arrays,
+ * which collapses the higher->lower pairs into one zone per target layer.
+ *
+ * `app/middleware`, `app/sessions.server`, `app/assets`, `app/languages`, and
+ * `app/styles` are intentionally left unconstrained (server/asset dirs).
+ */
+const buildNoRestrictedPathsConfig = (
+  sourceDir: string,
+): Linter.Config[] => {
+  const dir = (layer: string): string => `./${sourceDir}/${layer}`;
+
+  return [
+    {
+      files: [`${sourceDir}/**/!(*.test|*.stories).ts?(x)`],
+      name: 'import-x/architecture-boundaries',
+      rules: {
+        'import-x/no-restricted-paths': [
+          'error',
+          {
+            zones: [
+              {
+                from: [dir('routes')],
+                message:
+                  'Pages may only be imported by routes; a page must not import a route (import direction is routes -> pages -> components).',
+                target: dir('pages'),
+              },
+              {
+                from: [dir('routes'), dir('pages')],
+                message:
+                  'Reusable components must not depend on page- or route-level code (import direction is routes -> pages -> components).',
+                target: dir('components'),
+              },
+              {
+                from: [dir('routes'), dir('pages'), dir('components')],
+                message:
+                  'Hooks and state sit below the UI tree; they must not import components, pages, or routes.',
+                target: [dir('hooks'), dir('state')],
+              },
+              {
+                from: [
+                  dir('routes'),
+                  dir('pages'),
+                  dir('components'),
+                  dir('hooks'),
+                  dir('state'),
+                ],
+                message:
+                  'The service/data layer sits below the UI and orchestration layers; it must not import components, pages, routes, hooks, or state.',
+                target: dir('services'),
+              },
+              {
+                from: [
+                  dir('routes'),
+                  dir('pages'),
+                  dir('components'),
+                  dir('hooks'),
+                  dir('state'),
+                  dir('services'),
+                ],
+                message:
+                  'Utils are near-leaves; they may import only types and other utils.',
+                target: dir('utils'),
+              },
+              {
+                from: [
+                  dir('routes'),
+                  dir('pages'),
+                  dir('components'),
+                  dir('hooks'),
+                  dir('state'),
+                  dir('services'),
+                  dir('utils'),
+                ],
+                message:
+                  'Types are a pure leaf; they must not import any other app layer.',
+                target: dir('types'),
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ];
+};
+
 const buildNoRelativeImportPathsConfig = (
   sourceDir: string,
 ): Linter.Config[] => [
@@ -102,5 +202,6 @@ export const buildGuardrails = (sourceDir: string): Linter.Config[] => [
   ...noEnumConfig,
   ...noJsxIifeConfig,
   ...noSwitchConfig,
+  ...buildNoRestrictedPathsConfig(sourceDir),
   ...buildNoRelativeImportPathsConfig(sourceDir),
 ];
