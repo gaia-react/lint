@@ -1,0 +1,25 @@
+# pnpm settings. In pnpm 10.x+ only auth/registry settings are read from
+# .npmrc; everything else (including supply-chain hardening) lives here.
+
+# Supply-chain hardening; see https://pnpm.io/settings
+# Delay installs until a published version has had time to be vetted.
+# Value is in minutes; 10080 = 7 days. This mirrors the consuming GAIA app on
+# purpose: because this config can only ever pin dependencies that have already
+# cleared the 7-day window, every release of @gaia-react/lint installs cleanly
+# inside GAIA's own quarantine. GAIA exempts the @gaia-react/lint package itself
+# from its release-age check, but NOT lint's transitive deps; enforcing the
+# window here is what keeps those deps pre-aged so no downstream exclusion is
+# needed.
+minimumReleaseAge: 10080
+
+# Fail the install if a package's trust level has decreased vs prior releases.
+trustPolicy: no-downgrade
+
+# Acknowledge a known-good package that trips no-downgrade. semver's 6.x line
+# ended at 6.3.1 (before npm provenance was standard), so it carries no
+# attestation while the 7.x line does; pnpm reads that as a trust downgrade.
+# eslint-config-airbnb-extended -> eslint-plugin-import pins semver ^6.3.1, so
+# 6.3.1 is the correct, required version, not a supply-chain regression. Scope
+# the exception to exactly that version; no-downgrade stays enforced elsewhere.
+trustPolicyExclude:
+  - 'semver@6.3.1'
