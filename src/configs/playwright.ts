@@ -15,8 +15,11 @@ export const playwright: Linter.Config[] = [
     files: ['.playwright/**/*.ts?(x)'],
     rules: {
       ...playwrightPlugin.configs['flat/recommended'].rules,
+      // Every test must assert something. `assertFunctionPatterns` lets custom
+      // `expect*()` helpers count as the assertion. Error, never warn: a test
+      // that asserts nothing is a false green.
       'playwright/expect-expect': [
-        'warn',
+        'error',
         {assertFunctionPatterns: ['^expect[A-Z]']},
       ],
     },

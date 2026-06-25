@@ -66,9 +66,74 @@ export const testing: Linter.Config[] = [
       // rewrite to test.todo('...') so the gap is explicit. Contradicts
       // `warn-todo`, which stays off. Auto-fixable.
       'vitest/prefer-todo': 'error',
+      // Honesty (D-8 / SPEC-006 Rule 3, the cheap-win stand-in for
+      // `gaia-test-honesty/no-call-through-only`). A bare
+      // `toHaveBeenCalled()`/`toBeCalled()` proves the function ran but
+      // asserts nothing about how (arguments) or how many (count) — a
+      // call-through that re-proves the framework, not the behavior.
+      //
+      // SCOPE NOTE: `prefer-called-with` is BROADER than spec Rule 3. The spec
+      // rule fires only when a bare `toHaveBeenCalled()` is the SOLE assertion
+      // in a test; `prefer-called-with` fires on EVERY bare
+      // `toHaveBeenCalled()`/`toBeCalled()` (it exempts only the `.not` form).
+      // So this stands in for Rule 3 rather than matching it exactly.
+      'vitest/prefer-called-with': 'error',
       // A bare .toThrow() passes on ANY throw, masking the wrong error;
       // require an asserted message or matcher.
       'vitest/require-to-throw-message': 'error',
+    },
+  },
+  {
+    // Honesty (D-8 / SPEC-006 Rule 4, the cheap-win stand-in for
+    // `gaia-test-honesty/no-server-import-from-consumer`). A consumer test,
+    // story, or harness file must not import a server-only (`*.server`) or
+    // internal (`/internals/`) module: those are private surface, and
+    // reaching into them couples the test to implementation the public
+    // interface is meant to hide.
+    //
+    // Same testing glob as the `vitest` block above. The `*.server.test.*`
+    // exemption is the point of Rule 4: a dedicated server-side test IS the
+    // right place to import a `.server` module (mirrors the real
+    // `app/utils/tests/http.server.test.ts` importing `../http.server`).
+    //
+    // Implemented with the core `no-restricted-imports` rule (config only, no
+    // custom plugin) rather than a dedicated AST rule. Chosen over
+    // `import-x/no-restricted-paths` because Rule 4 keys off the import
+    // SPECIFIER shape (`*.server`, `/internals/`) plus a per-file filename
+    // exemption, not the directory `from`/`target` zones that
+    // `no-restricted-paths` models.
+    //
+    // LIMITATION vs the would-be custom rule: `no-restricted-imports` covers
+    // static `import` / `export ... from` only, NOT dynamic
+    // `import('./x.server')`. The dynamic case is intentionally out of scope
+    // for this cheap-win form; the advisory worthiness audit backstops it.
+    //
+    // ERROR severity, per spec (Rule 4 is an error rule).
+    files: [
+      '**/*.test.ts?(x)',
+      '**/*.stories.ts?(x)',
+      'test/**/*.ts?(x)',
+    ],
+    ignores: ['**/*.server.test.*'],
+    name: 'gaia-test-honesty/no-server-import-from-consumer',
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/*.server'],
+              message:
+                "Do not import a server-only ('*.server') module from a consumer test. Server-only modules are private surface: reach them through the public interface, or from a dedicated *.server.test.* file (which is exempt from this rule).",
+            },
+            {
+              group: ['**/internals/**', '**/internals'],
+              message:
+                "Do not import an internal ('/internals/') module from a consumer test. Internal modules are private surface: importing them couples the test to implementation the public interface is meant to hide. Reach the behavior through the public interface instead.",
+            },
+          ],
+        },
+      ],
     },
   },
   {
