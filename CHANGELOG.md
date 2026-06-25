@@ -1,5 +1,28 @@
 # @gaia-react/lint
 
+## 1.6.0
+
+### Minor Changes
+
+- [#29](https://github.com/gaia-react/lint/pull/29) [`e7a2232`](https://github.com/gaia-react/lint/commit/e7a22321603248e5bf4790926677762581c0967c) Thanks [@stevensacks](https://github.com/stevensacks)! - Add two test-honesty lint rules and enforce error-only severity in the test config (no `warn`).
+  - **`vitest/prefer-called-with` (error)** — a bare `toHaveBeenCalled()`/`toBeCalled()` proves a function ran but asserts nothing about arguments or count; require the `*With` form. Exempts the `.not` form.
+  - **`no-restricted-imports` in test/story files (error)** — consumer test, story, and harness files may not import a server-only (`*.server`) or internal (`**/internals/**`) module; reach the behavior through the public interface instead. A dedicated `*.server.test.*` file is exempt (the right place to import a `.server` module). Covers static `import` / `export … from` only, not dynamic `import()`.
+  - **`playwright/expect-expect` promoted `warn` → `error`** — a Playwright test that asserts nothing is a false green. Custom `expect*()` helpers still count via `assertFunctionPatterns`.
+
+  Consumers on `--max-warnings=0` already treated the prior `warn` as blocking, so this only makes the intent explicit. Expect new errors on bare `toHaveBeenCalled()` and on server/internal imports from consumer tests — treat them as signal.
+
+- [#28](https://github.com/gaia-react/lint/pull/28) [`b05f445`](https://github.com/gaia-react/lint/commit/b05f4459af8742f995c36e6fee67fa598ec53006) Thanks [@stevensacks](https://github.com/stevensacks)! - Refresh the quarantined toolchain dependencies.
+  - `eslint-plugin-unicorn` 64 → 65. Held at 65 deliberately: unicorn 66 requires ESLint 10.4, and this config stays on ESLint 9 until that migration is coordinated with the consuming app. Unicorn 65 adds a large batch of rules to its `recommended` preset, which this config spreads, so consumers will see new unicorn findings on upgrade. Most are auto-fixable; treat them as signal.
+  - `unicorn/prefer-includes-over-repeated-comparisons` is disabled. `Array#includes` returns a plain boolean, not a type predicate, so it cannot narrow a union the way an `===` comparison chain does. In a typed codebase the chain is the type-safe idiom; forcing `.includes()` discards the narrowing and the refined type of the value along with it. This joins the config's existing set of disabled unicorn opinions that fight idiomatic typed React.
+  - `eslint-plugin-storybook` 10.4.2 → 10.4.6.
+  - `@vitest/eslint-plugin` 1.6.19 → 1.6.20.
+  - `eslint-plugin-better-tailwindcss` 4.5.0 → 4.6.0.
+  - `eslint-plugin-perfectionist` 5.9.0 → 5.9.1.
+
+  Every bump has cleared the 7-day release-age quarantine, so each installs cleanly under a downstream release-age policy with no new `trustPolicyExclude` entries.
+
+- [#31](https://github.com/gaia-react/lint/pull/31) [`178157f`](https://github.com/gaia-react/lint/commit/178157f1bfb594953c2016bbe58f4b905b6d897e) Thanks [@stevensacks](https://github.com/stevensacks)! - Exempt typed `resources+`/`actions+` data endpoints from the `import-x/no-restricted-paths` architecture boundary. `no-restricted-paths` cannot distinguish a type-only import, so it flagged a UI component's `import type {action}` from a typed data endpoint (the `useFetcher<typeof action>` pattern). The UI layers (pages, components, hooks/state) now carry an `except` for `routes/{actions+,resources+}`; services, utils, and types are deliberately excluded so the carve-out stays within the UI layer.
+
 ## 1.5.1
 
 ### Patch Changes
