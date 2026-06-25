@@ -275,30 +275,57 @@ const preferArrowFunctionsConfig: Linter.Config[] = [
     },
   },
   {
-    // `prefer-arrow-functions` has a hardcoded exemption for named
-    // default-exported declarations (`guard.js:hasNameAndIsExportedAsDefaultExport`),
-    // so `export default function Foo() {}` slips through. This selector closes
-    // that gap. Convert to `const Foo = () => {}; export default Foo;` instead.
-    // `.d.ts` is ignored because ambient `export default function …(): T;`
-    // declarations have no body to convert.
-    ignores: ['**/*.d.ts'],
-    name: 'prefer-arrow/no-default-exported-function',
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          message:
-            'Use `const Name = () => {}; export default Name;` instead. The prefer-arrow-functions plugin exempts named default-exported declarations upstream.',
-          selector: 'ExportDefaultDeclaration > FunctionDeclaration',
-        },
-      ],
-    },
-  },
-  {
     files: ['**/*.d.ts'],
     name: 'ts-definition-files/prefer-arrow-off',
     rules: {
       'prefer-arrow-functions/prefer-arrow-functions': 'off',
+    },
+  },
+];
+
+/**
+ * All `no-restricted-syntax` selectors live in one config object. ESLint flat
+ * config merges this rule key by replacement (last match wins), not
+ * concatenation, so a second block matching the same files would silently
+ * clobber these selectors. Each selector carries its own message.
+ *
+ * `.d.ts` is ignored: ambient `export default function …(): T;` declarations
+ * have no body to convert, and type-definition files contain no render code.
+ */
+const restrictedSyntaxConfig: Linter.Config[] = [
+  {
+    ignores: ['**/*.d.ts'],
+    name: 'gaia/no-restricted-syntax',
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          // `prefer-arrow-functions` has a hardcoded exemption for named
+          // default-exported declarations
+          // (`guard.js:hasNameAndIsExportedAsDefaultExport`), so
+          // `export default function Foo() {}` slips through. This selector
+          // closes that gap.
+          message:
+            'Use `const Name = () => {}; export default Name;` instead. The prefer-arrow-functions plugin exempts named default-exported declarations upstream.',
+          selector: 'ExportDefaultDeclaration > FunctionDeclaration',
+        },
+        {
+          // GAIA never renders `null`. `cond ? <JSX/> : null` is the
+          // numeric-0-safe `&&` guard written the long way. Both JSX-null
+          // ternary selectors only match a JSXElement/JSXFragment branch, so
+          // they are inert outside `.tsx`/`.jsx`.
+          message:
+            'Do not render `null` from a ternary. Use a boolean-guarded `&&`: `cond && <JSX/>` (coerce a numeric/falsy guard with `!!cond`).',
+          selector:
+            "ConditionalExpression[alternate.raw='null']:matches([consequent.type='JSXElement'], [consequent.type='JSXFragment'])",
+        },
+        {
+          message:
+            'Do not render `null` from a ternary. Invert the condition and use `&&`: `!cond && <JSX/>`.',
+          selector:
+            "ConditionalExpression[consequent.raw='null']:matches([alternate.type='JSXElement'], [alternate.type='JSXFragment'])",
+        },
+      ],
     },
   },
 ];
@@ -324,5 +351,6 @@ export const buildBase = (sourceDir: string): Linter.Config[] => [
   ...buildImportXConfig(sourceDir),
   ...eslintCommentsConfig,
   ...preferArrowFunctionsConfig,
+  ...restrictedSyntaxConfig,
   ...lodashUnderscoreConfig,
 ];
