@@ -72,19 +72,12 @@ export const testing: Linter.Config[] = [
       // asserts nothing about how (arguments) or how many (count) — a
       // call-through that re-proves the framework, not the behavior.
       //
-      // INTENTIONALLY `warn`, not `error`. This is the one documented
-      // exception to this block's "every lint rule is `error`, never `warn`"
-      // policy. Per D-8 / R-8: the rule ships non-blocking so its scoping can
-      // be observed on real code before any warn -> error promotion, and a
-      // promotion requires a human-confirmed true positive, never a clean
-      // (zero-match) run.
-      //
       // SCOPE NOTE: `prefer-called-with` is BROADER than spec Rule 3. The spec
       // rule fires only when a bare `toHaveBeenCalled()` is the SOLE assertion
       // in a test; `prefer-called-with` fires on EVERY bare
       // `toHaveBeenCalled()`/`toBeCalled()` (it exempts only the `.not` form).
       // So this stands in for Rule 3 rather than matching it exactly.
-      'vitest/prefer-called-with': 'warn',
+      'vitest/prefer-called-with': 'error',
       // A bare .toThrow() passes on ANY throw, masking the wrong error;
       // require an asserted message or matcher.
       'vitest/require-to-throw-message': 'error',
