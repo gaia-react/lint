@@ -95,11 +95,23 @@ const noSwitchConfig: Linter.Config[] = [
  *
  * `app/middleware`, `app/sessions.server`, `app/assets`, `app/languages`, and
  * `app/styles` are intentionally left unconstrained (server/asset dirs).
+ *
+ * The UI layers (pages, components, hooks/state) are exempted from the boundary
+ * when importing `routes/resources+` and `routes/actions+`. These are no-UI,
+ * typed data endpoints the UI is explicitly meant to consume (e.g.
+ * `useFetcher<typeof action>`). `import-x/no-restricted-paths` cannot
+ * distinguish a type-only import, so without this carve-out it flags a
+ * component's `import type {action}` from a typed endpoint. `except` resolves
+ * relative to each zone's `from`; only `routes` contains `actions+`/`resources+`
+ * subfolders, so the exemption is scoped to route imports of those endpoints and
+ * does not leak to the lower layers. The services, utils, and types zones get no
+ * exemption, so the carve-out stays within the UI layer.
  */
 const buildNoRestrictedPathsConfig = (
   sourceDir: string,
 ): Linter.Config[] => {
   const dir = (layer: string): string => `./${sourceDir}/${layer}`;
+  const dataEndpoints = ['actions+', 'resources+'];
 
   return [
     {
@@ -111,21 +123,24 @@ const buildNoRestrictedPathsConfig = (
           {
             zones: [
               {
+                except: dataEndpoints,
                 from: [dir('routes')],
                 message:
-                  'Pages may only be imported by routes; a page must not import a route (import direction is routes -> pages -> components).',
+                  'Pages may only be imported by routes; a page must not import a route (import direction is routes -> pages -> components). Typed `resources+`/`actions+` data endpoints are exempt.',
                 target: dir('pages'),
               },
               {
+                except: dataEndpoints,
                 from: [dir('routes'), dir('pages')],
                 message:
-                  'Reusable components must not depend on page- or route-level code (import direction is routes -> pages -> components).',
+                  'Reusable components must not depend on page- or route-level code (import direction is routes -> pages -> components). Typed `resources+`/`actions+` data endpoints are exempt.',
                 target: dir('components'),
               },
               {
+                except: dataEndpoints,
                 from: [dir('routes'), dir('pages'), dir('components')],
                 message:
-                  'Hooks and state sit below the UI tree; they must not import components, pages, or routes.',
+                  'Hooks and state sit below the UI tree; they must not import components, pages, or routes. Typed `resources+`/`actions+` data endpoints are exempt.',
                 target: [dir('hooks'), dir('state')],
               },
               {
