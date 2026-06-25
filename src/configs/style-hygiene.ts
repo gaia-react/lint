@@ -124,6 +124,11 @@ const unicornConfig: Linter.Config[] = [
       'unicorn/no-useless-undefined': 'off',
       'unicorn/prefer-export-from': 'off',
       'unicorn/prefer-global-this': 'off',
+      // `Array#includes` returns a plain boolean, not a type predicate, so it
+      // cannot narrow a union the way an `===` comparison chain does. In a typed
+      // codebase the chain is the type-safe idiom; forcing `.includes()` discards
+      // the narrowing and the value's refined type along with it.
+      'unicorn/prefer-includes-over-repeated-comparisons': 'off',
       'unicorn/prefer-set-has': 'off',
       'unicorn/prefer-switch': 'off',
       'unicorn/prefer-ternary': 'off',
