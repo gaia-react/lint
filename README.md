@@ -59,7 +59,7 @@ new source root — no per-config override blocks needed.
 | `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard                  | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
-| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
+| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
 | `testing`        | `Linter.Config[]`                | Vitest + Testing Library config scoped to `*.test.*` and `test/`                                                                                  | optional  |
 | `storybook`      | `Linter.Config[]`                | `eslint-plugin-storybook` scoped to `*.stories.*`                                                                                                 | optional  |
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `e2e/`                                                                                                       | optional  |
@@ -140,7 +140,7 @@ Supported versions:
 
 ## Custom rules included
 
-Three rules are implemented inside this package and ship as part of
+Four rules are implemented inside this package and ship as part of
 `guardrails`.
 
 ### `no-enum`
@@ -177,6 +177,28 @@ Opt out for a file or block:
 
 ```js
 {files: ['src/legacy/**'], rules: {'no-jsx-iife/no-jsx-iife': 'off'}}
+```
+
+### `no-null-render`
+
+Standardizes the empty render on `undefined` instead of `null` in `.tsx` and
+`.jsx` files. A `return null` inside a function that provably renders JSX (it
+returns a JSX element elsewhere in the same scope) is rewritten to
+`return undefined`. `null` and `undefined` are identical to React's reconciler
+(both, with `false`/`true`, are the same empty slot); this is a consistency
+convention that picks one of two equivalent forms, not a correctness or
+performance fix.
+
+Autofixable: `--fix` rewrites `return null` → `return undefined`. The fix is
+deliberately conservative and only touches a `return null` whose enclosing
+function is provably a render function, so a `return null` in a loader, action,
+or plain utility is never altered. `: null` ternary arms are out of scope (the
+report-only `no-restricted-syntax` selectors cover those).
+
+Opt out for a file or block:
+
+```js
+{files: ['src/legacy/**'], rules: {'no-null-render/no-null-render': 'off'}}
 ```
 
 ## Tailwind / better-tailwindcss factory
