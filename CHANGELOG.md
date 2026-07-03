@@ -1,5 +1,11 @@
 # @gaia-react/lint
 
+## 1.9.0
+
+### Minor Changes
+
+- [#36](https://github.com/gaia-react/lint/pull/36) [`fe262a6`](https://github.com/gaia-react/lint/commit/fe262a630e59913b138368161982c384678bad64) Thanks [@stevensacks](https://github.com/stevensacks)! - Add the `no-zod-enum` guardrail: `z.enum(...)` is now an `error` in `.ts`/`.tsx`. Use `z.literal([...])` for string unions (sort values alphanumerically). Report-only (no autofix), since `z.enum`'s `.enum`/`.options` accessors have no `z.literal` array equivalent and a rename can't sort. Consumers with existing `z.enum()` will see a new lint error on upgrade.
+
 ## 1.8.0
 
 ### Minor Changes
