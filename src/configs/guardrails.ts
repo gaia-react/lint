@@ -5,6 +5,7 @@ import noEnumPlugin from '../plugins/no-enum.js';
 import noJsxIifePlugin from '../plugins/no-jsx-iife.js';
 import noNullRenderPlugin from '../plugins/no-null-render.js';
 import noSwitchPlugin from '../plugins/no-switch.js';
+import noZodEnumPlugin from '../plugins/no-zod-enum.js';
 
 const buildSonarConfig = (sourceDir: string): Linter.Config[] => [
   sonarjs.configs!.recommended as Linter.Config,
@@ -82,6 +83,15 @@ const noSwitchConfig: Linter.Config[] = [
     name: 'no-switch',
     plugins: {'no-switch': noSwitchPlugin},
     rules: {'no-switch/no-switch': 'error'},
+  },
+];
+
+const noZodEnumConfig: Linter.Config[] = [
+  {
+    files: ['**/*.ts?(x)'],
+    name: 'no-zod-enum',
+    plugins: {'no-zod-enum': noZodEnumPlugin},
+    rules: {'no-zod-enum/no-zod-enum': 'error'},
   },
 ];
 
@@ -228,6 +238,7 @@ export const buildGuardrails = (sourceDir: string): Linter.Config[] => [
   ...noJsxIifeConfig,
   ...noNullRenderConfig,
   ...noSwitchConfig,
+  ...noZodEnumConfig,
   ...buildNoRestrictedPathsConfig(sourceDir),
   ...buildNoRelativeImportPathsConfig(sourceDir),
 ];
