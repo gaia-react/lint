@@ -1,6 +1,7 @@
 import vitest from '@vitest/eslint-plugin';
 import jestDom from 'eslint-plugin-jest-dom';
 import testingLibrary from 'eslint-plugin-testing-library';
+import {RESTRICTED_IMPORT_PATHS} from './restricted-imports.js';
 import type {Linter} from 'eslint';
 
 /**
@@ -120,6 +121,11 @@ export const testing: Linter.Config[] = [
       'no-restricted-imports': [
         'error',
         {
+          // `paths` re-declares the global `@conform-to/zod` ban from base.ts.
+          // Flat config replaces a rule's options wholesale, so this later
+          // block would otherwise drop the conform ban on test/story files.
+          // Same shared const as base.ts, to stay DRY.
+          paths: RESTRICTED_IMPORT_PATHS,
           patterns: [
             {
               group: ['**/*.server'],

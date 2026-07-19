@@ -3,6 +3,7 @@ import js from '@eslint/js';
 import {configs, plugins, rules} from 'eslint-config-airbnb-extended';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import lodashUnderscore from 'eslint-plugin-you-dont-need-lodash-underscore';
+import {RESTRICTED_IMPORT_PATHS} from './restricted-imports.js';
 import type {ESLint, Linter} from 'eslint';
 
 const jsConfig: Linter.Config[] = [
@@ -342,6 +343,24 @@ const restrictedSyntaxConfig: Linter.Config[] = [
   },
 ];
 
+/**
+ * Global `no-restricted-imports` bans, applied to every `.ts`/`.tsx` file.
+ *
+ * The shared `RESTRICTED_IMPORT_PATHS` const is also spread into testing.ts's
+ * own `no-restricted-imports` block. Flat config replaces a rule's options
+ * wholesale, so without that second reference this global ban would be dropped
+ * on test/story files (which testing.ts re-scopes the rule for).
+ */
+const restrictedImportsConfig: Linter.Config[] = [
+  {
+    files: ['**/*.ts?(x)'],
+    name: 'gaia/no-restricted-imports',
+    rules: {
+      'no-restricted-imports': ['error', {paths: RESTRICTED_IMPORT_PATHS}],
+    },
+  },
+];
+
 const lodashUnderscoreConfig: Linter.Config[] = [
   {
     name: 'you-dont-need-lodash-underscore',
@@ -364,5 +383,6 @@ export const buildBase = (sourceDir: string): Linter.Config[] => [
   ...eslintCommentsConfig,
   ...preferArrowFunctionsConfig,
   ...restrictedSyntaxConfig,
+  ...restrictedImportsConfig,
   ...lodashUnderscoreConfig,
 ];

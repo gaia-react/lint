@@ -56,7 +56,7 @@ new source root — no per-config override blocks needed.
 
 | Property         | Shape                            | Includes                                                                                                                                          | Required? |
 | ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard                  | required  |
+| `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard, `no-restricted-imports` (bans bare `@conform-to/zod`) | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
 | `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
