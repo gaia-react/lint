@@ -22,6 +22,12 @@ export const playwright: Linter.Config[] = [
         'error',
         {assertFunctionPatterns: ['^expect[A-Z]']},
       ],
+      // A bare `test.skip()` is a test switched off at author time and stays
+      // flagged at the recommended set's severity. `test.skip(condition, reason)`
+      // is a different thing: Playwright's own API for a test that does not
+      // apply to the environment it just found (a feature the project did not
+      // enable, a browser without the capability). Allow the conditional form.
+      'playwright/no-skipped-test': ['warn', {allowConditional: true}],
     },
   },
 ];
