@@ -22,10 +22,15 @@ export type GaiaLintIgnoresOptions = {
  * GAIA's default ignore globs — matches the static `ignored-files` block in
  * GAIA's `eslint.config.mjs`. Consumer's `extra` ignores get concatenated
  * onto this list.
+ *
+ * Every entry names generated output, a non-source asset, or a tool-owned
+ * script directory. Authored source stays out: a bare directory entry here is
+ * a GLOBAL ignore, which beats any later block's `files`, so ignoring a
+ * directory that another block scopes itself to silently kills that block.
+ * `.playwright` and `.storybook` hold hand-written source that the
+ * `playwright` and `storybook` blocks exist to lint.
  */
 const defaultIgnores = [
-  '.storybook',
-  '.playwright',
   '/.react-router/**',
   '.claude/**/*.js',
   '.claude/**/*.cjs',
