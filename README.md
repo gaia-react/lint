@@ -23,6 +23,7 @@ export default defineConfig([
   ...lint.ignores,
   ...lint.base,
   ...lint.react,
+  ...lint.reactRouter,
   ...lint.testing,
   ...lint.storybook,
   ...lint.playwright,
@@ -32,6 +33,9 @@ export default defineConfig([
   ...lint.prettier,
 ]);
 ```
+
+Drop the `reactRouter` line if you are not on React Router framework mode.
+See [Router-specific rules](#router-specific-rules).
 
 ## Factory options
 
@@ -58,6 +62,7 @@ new source root — no per-config override blocks needed.
 | ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard, `no-restricted-imports` (bans bare `@conform-to/zod`) | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
+| `reactRouter`    | `Linter.Config[]`                | Relaxations for React Router framework mode. Spread **after** `react`. See [Router-specific rules](#router-specific-rules)                        | React Router only |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
 | `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
 | `testing`        | `Linter.Config[]`                | Vitest + Testing Library config scoped to `*.test.*` and `test/`                                                                                  | optional  |
@@ -200,6 +205,36 @@ Opt out for a file or block:
 ```js
 {files: ['src/legacy/**'], rules: {'no-null-render/no-null-render': 'off'}}
 ```
+
+## Router-specific rules
+
+`reactRouter` is opt-in because it is **subtractive**. `storybook` and
+`playwright` only add rules, so spreading them can never weaken anything.
+`reactRouter` turns `no-empty-pattern` **off**, and its glob
+(`**/routes/**/*.tsx`) is not unique to React Router, since TanStack Router
+uses a `routes/` directory too. Shipping it inside `react` silently relaxed
+the rule for every file-based router that isn't React Router.
+
+```js
+...lint.react,
+...lint.reactRouter,   // React Router framework mode only
+```
+
+**On React Router?** Spread it. A route module destructures nothing from its
+typed props (`({}: Route.ComponentProps)`), which `no-empty-pattern` reads as
+an empty pattern.
+
+**On TanStack Router, or any other router?** Omit it, and keep the rule.
+`createFileRoute(...)({component: Named})` never produces the empty-pattern
+shape. You will most likely also want to ignore your generated route tree:
+
+```js
+...lint.ignores({extra: ['**/routeTree.gen.ts']}),
+```
+
+The `/.react-router/**` glob stays in the `ignores` defaults. It names a
+directory that only exists in a React Router project, so it costs other
+projects nothing.
 
 ## Tailwind / better-tailwindcss factory
 

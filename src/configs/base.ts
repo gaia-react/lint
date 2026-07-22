@@ -134,17 +134,6 @@ const buildTsEslintConfig = (sourceDir: string): Linter.Config[] => [
   },
   {
     files: [
-      `${sourceDir}/hooks/**/*`,
-      `${sourceDir}/routes/**/*`,
-      `${sourceDir}/sessions.server/**/*`,
-    ],
-    name: 'typescript/only-throw-error',
-    rules: {
-      '@typescript-eslint/only-throw-error': 'off',
-    },
-  },
-  {
-    files: [
       `${sourceDir}/utils/**`,
       `${sourceDir}/services/**`,
       `${sourceDir}/hooks/**`,

@@ -9,6 +9,7 @@ import {ignores, type GaiaLintIgnoresOptions} from './configs/ignores.js';
 import {playwright} from './configs/playwright.js';
 import {prettier} from './configs/prettier.js';
 import {react} from './configs/react.js';
+import {reactRouter} from './configs/react-router.js';
 import {storybook} from './configs/storybook.js';
 import {buildStyleHygiene} from './configs/style-hygiene.js';
 import {testing} from './configs/testing.js';
@@ -44,6 +45,7 @@ export type GaiaLintBundle = {
   playwright: Linter.Config[];
   prettier: Linter.Config[];
   react: Linter.Config[];
+  reactRouter: Linter.Config[];
   storybook: Linter.Config[];
   styleHygiene: Linter.Config[];
   testing: Linter.Config[];
@@ -80,6 +82,7 @@ const gaiaLint = (opts?: GaiaLintOptions): GaiaLintBundle => {
     playwright,
     prettier,
     react,
+    reactRouter,
     storybook,
     styleHygiene: buildStyleHygiene(sourceDir),
     testing,
