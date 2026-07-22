@@ -8,9 +8,8 @@ import type {Linter} from 'eslint';
  * Pulls React, React Hooks, and JSX A11y plugins plus Airbnb's recommended
  * React config, then layers GAIA's project-wide React rule overrides.
  *
- * The `react-router/routes` override targets `**\/routes/**\/*.tsx` — a GAIA
- * convention that's harmless for consumers without that folder structure
- * (the override only fires when files match).
+ * Router-specific relaxations live in the optional `reactRouter` block, not
+ * here, so a project on a different file-based router keeps its full rule set.
  */
 export const react: Linter.Config[] = [
   // React plugin
@@ -48,14 +47,6 @@ export const react: Linter.Config[] = [
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/require-default-props': 'off',
-    },
-  },
-  {
-    files: ['**/routes/**/*.tsx'],
-    name: 'react-router/routes',
-    rules: {
-      'no-empty-pattern': 'off',
-      'react/display-name': 'off',
     },
   },
   {

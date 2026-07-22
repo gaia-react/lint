@@ -7,6 +7,7 @@ export default defineConfig([
   ...lint.ignores,
   ...lint.base,
   ...lint.react,
+  ...lint.reactRouter, // React Router framework mode only; omit for other routers
   ...lint.testing,
   ...lint.storybook,
   ...lint.playwright,
