@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type {Linter} from 'eslint';
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
 import sonarjs from 'eslint-plugin-sonarjs';
@@ -117,21 +118,44 @@ const noZodEnumConfig: Linter.Config[] = [
  * `app/styles` are intentionally left unconstrained (server/asset dirs).
  *
  * The UI layers (pages, components, hooks/state) are exempted from the boundary
- * when importing `routes/resources+` and `routes/actions+`. These are no-UI,
- * typed data endpoints the UI is explicitly meant to consume (e.g.
+ * when importing a typed data-endpoint route (`routes/actions.*`,
+ * `routes/resources.*`, or the older `routes/actions+`/`routes/resources+`
+ * group folders, still accepted on the 2.x line). These are no-UI, typed data
+ * endpoints the UI is explicitly meant to consume (e.g.
  * `useFetcher<typeof action>`). `import-x/no-restricted-paths` cannot
  * distinguish a type-only import, so without this carve-out it flags a
- * component's `import type {action}` from a typed endpoint. `except` resolves
- * relative to each zone's `from`; only `routes` contains `actions+`/`resources+`
- * subfolders, so the exemption is scoped to route imports of those endpoints and
- * does not leak to the lower layers. The services, utils, and types zones get no
- * exemption, so the carve-out stays within the UI layer.
+ * component's `import type {action}` from a typed endpoint.
+ *
+ * These three zones use glob-mode `from` (every entry is a `**` glob), because
+ * import-x resolves a plain-mode `except` as a descendant path of `from`, which
+ * cannot match a sibling flat route file. In glob mode `except` entries are
+ * matched as absolute-path globs against the resolved import path, so they are
+ * built from `process.cwd()` (the same default basePath import-x resolves
+ * `from` against) rather than written as `**`-relative patterns: a leading `**`
+ * does not cross a dot-prefixed path segment, so a `**`-relative pattern goes
+ * silently dark under a dot-directory checkout (e.g. a `.claude/worktrees/`
+ * worktree). Matching is by basename prefix, not a list of GAIA's endpoint
+ * files. The services, utils, and types zones get no exemption, so the
+ * carve-out stays within the UI layer.
  */
 const buildNoRestrictedPathsConfig = (
   sourceDir: string,
 ): Linter.Config[] => {
   const dir = (layer: string): string => `./${sourceDir}/${layer}`;
-  const dataEndpoints = ['actions+', 'resources+'];
+  const globDir = (layer: string): string => `./${sourceDir}/${layer}/**`;
+  // Absolute, forward-slash, anchored where import-x resolves `from`
+  // (its basePath defaults to process.cwd()).
+  const routesDir = path
+    .resolve(process.cwd(), sourceDir, 'routes')
+    .split(path.sep)
+    .join('/');
+  const dataEndpoints = [
+    `${routesDir}/actions.*`,
+    `${routesDir}/resources.*`,
+    // Older `+` group folders stay exempt through the 2.x line.
+    `${routesDir}/actions+/**`,
+    `${routesDir}/resources+/**`,
+  ];
 
   return [
     {
@@ -144,23 +168,23 @@ const buildNoRestrictedPathsConfig = (
             zones: [
               {
                 except: dataEndpoints,
-                from: [dir('routes')],
+                from: [globDir('routes')],
                 message:
-                  'Pages may only be imported by routes; a page must not import a route (import direction is routes -> pages -> components). Typed `resources+`/`actions+` data endpoints are exempt.',
+                  'Pages may only be imported by routes; a page must not import a route (import direction is routes -> pages -> components). Typed `actions.*`/`resources.*` data-endpoint routes are exempt (the older `actions+`/`resources+` folders are still accepted).',
                 target: dir('pages'),
               },
               {
                 except: dataEndpoints,
-                from: [dir('routes'), dir('pages')],
+                from: [globDir('routes'), globDir('pages')],
                 message:
-                  'Reusable components must not depend on page- or route-level code (import direction is routes -> pages -> components). Typed `resources+`/`actions+` data endpoints are exempt.',
+                  'Reusable components must not depend on page- or route-level code (import direction is routes -> pages -> components). Typed `actions.*`/`resources.*` data-endpoint routes are exempt (the older `actions+`/`resources+` folders are still accepted).',
                 target: dir('components'),
               },
               {
                 except: dataEndpoints,
-                from: [dir('routes'), dir('pages'), dir('components')],
+                from: [globDir('routes'), globDir('pages'), globDir('components')],
                 message:
-                  'Hooks and state sit below the UI tree; they must not import components, pages, or routes. Typed `resources+`/`actions+` data endpoints are exempt.',
+                  'Hooks and state sit below the UI tree; they must not import components, pages, or routes. Typed `actions.*`/`resources.*` data-endpoint routes are exempt (the older `actions+`/`resources+` folders are still accepted).',
                 target: [dir('hooks'), dir('state')],
               },
               {
