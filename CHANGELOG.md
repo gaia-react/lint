@@ -1,5 +1,11 @@
 # @gaia-react/lint
 
+## 2.2.0
+
+### Minor Changes
+
+- [#47](https://github.com/gaia-react/lint/pull/47) [`8d222c6`](https://github.com/gaia-react/lint/commit/8d222c60fb6c0b68539abd834355a62553a5ab36) Thanks [@stevensacks](https://github.com/stevensacks)! - `guardrails`'s architecture-boundary carve-out now exempts flat `actions.*` and `resources.*` route files, matching `@react-router/fs-routes`'s dot-delimited naming. The older `actions+`/`resources+` group-folder spelling is still accepted, so projects on either layout keep passing without a config change.
+
 ## 2.1.0
 
 ### Minor Changes
