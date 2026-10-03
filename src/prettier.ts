@@ -6,7 +6,7 @@ const config: Config = {
   plugins: ['prettier-plugin-tailwindcss'],
   singleQuote: true,
   tabWidth: 2,
-  tailwindFunctions: ['cn', 'twJoin', 'twMerge'],
+  tailwindFunctions: ['twJoin', 'twMerge'],
   trailingComma: 'es5',
 };
 
