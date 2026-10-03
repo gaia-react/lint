@@ -1,5 +1,11 @@
 # @gaia-react/lint
 
+## 2.3.0
+
+### Minor Changes
+
+- [#52](https://github.com/gaia-react/lint/pull/52) [`d1182f5`](https://github.com/gaia-react/lint/commit/d1182f5ef10d23399e2f18a265ba985cbdf24180) Thanks [@stevensacks](https://github.com/stevensacks)! - Add a `cn-conditional` guardrails rule that reports object arguments and ternaries with an empty branch (`undefined`, `null`, `false`, `''`) passed to `cn` from the `cn` package, so a conditional class is written as `cond && 'class'`. It keys on the `cn` import from `'cn'` and stays active in test and story files. Add `cn` to the Prettier config's `tailwindFunctions` so classes inside `cn(...)` sort like `twJoin` and `twMerge`, which stay in the list.
+
 ## 2.2.0
 
 ### Minor Changes
