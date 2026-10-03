@@ -54,7 +54,7 @@ const lint = gaiaLint({sourceDir: 'src'});
 ```
 
 That single call rebinds `base`, `styleHygiene`, and `guardrails` to the
-new source root: no per-config override blocks needed.
+new source root — no per-config override blocks needed.
 
 ## Bundle shape
 
@@ -64,11 +64,11 @@ new source root: no per-config override blocks needed.
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
 | `reactRouter`    | `Linter.Config[]`                | Relaxations for React Router framework mode. Spread **after** `react`. See [Router-specific rules](#router-specific-rules)                        | React Router only |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
-| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `cn-conditional` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
+| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
 | `testing`        | `Linter.Config[]`                | Vitest + Testing Library config scoped to `*.test.*` and `test/`                                                                                  | optional  |
 | `storybook`      | `Linter.Config[]`                | `eslint-plugin-storybook` scoped to `*.stories.*` and `.storybook/main.*`                                                                          | optional  |
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `.playwright/`                                                                                                | optional  |
-| `prettier`       | `Linter.Config[]`                | `eslint-config-prettier`, must be **last** to disable formatting rules                                                                           | required if using Prettier |
+| `prettier`       | `Linter.Config[]`                | `eslint-config-prettier` — must be **last** to disable formatting rules                                                                           | required if using Prettier |
 | `betterTailwind` | `(opts) => Linter.Config[]`      | `eslint-plugin-better-tailwindcss` factory; takes `entryPoint` (path to Tailwind entry CSS) and optional `ignore` (class names to skip)           | optional  |
 | `ignores`        | `Iterable<Linter.Config> & ((opts?) => Linter.Config[])` | `includeIgnoreFile` helper plus GAIA defaults. Spread directly for defaults (`...lint.ignores`) or call with options to override (`...lint.ignores({extra: ['.gaia/**']})`). | recommended |
 
@@ -145,7 +145,7 @@ Supported versions:
 
 ## Custom rules included
 
-These rules are implemented inside this package and ship as part of
+Four rules are implemented inside this package and ship as part of
 `guardrails`.
 
 ### `no-enum`
@@ -206,30 +206,6 @@ Opt out for a file or block:
 {files: ['src/legacy/**'], rules: {'no-null-render/no-null-render': 'off'}}
 ```
 
-### `cn-conditional`
-
-Holds one form for a conditional class passed to `cn` from the
-[`cn`](https://www.npmjs.com/package/cn) package: an inline ternary with
-`undefined` as the empty branch. It reports an object argument (`cn('a', {b: c})`)
-and any `&&`, `||`, or `??` conditional (`cn('a', c && 'b')`), at any depth inside
-array arguments and ternary branches. Each offending node is reported once.
-
-Allowed: `cn('a', c ? 'b' : undefined)`, strings, identifiers, lookups
-(`VARIANTS[v]`), arrays of those, a logical expression inside a ternary test
-(`cn(a && b ? 'x' : undefined)`), spreads, and template literals. Write a
-negated condition by swapping the branches (`a ? undefined : 'x'`).
-
-It only fires on a call to the named import `cn` from `'cn'` (an aliased import
-counts). A locally declared `cn`, or a `cn` imported from any other module, is
-never reported. It is not autofixable, and it is active in test, story, and
-Playwright files as well as source.
-
-Opt out for a file or block:
-
-```js
-{files: ['src/legacy/**'], rules: {'cn-conditional/cn-conditional': 'off'}}
-```
-
 ## Router-specific rules
 
 `reactRouter` is opt-in because it is **subtractive**. `storybook` and
@@ -281,7 +257,7 @@ where your Tailwind entry CSS file lives.
 
 `ignores` produces a leading flat-config block that merges your
 `.gitignore` plus GAIA defaults. `.gitignore` is picked up automatically
-if it exists at the project root; no need to declare it.
+if it exists at the project root — no need to declare it.
 
 `lint.ignores` is dual-shape: spread it directly for the default case
 (no call), or call it with options to override.
@@ -303,10 +279,10 @@ if it exists at the project root; no need to declare it.
 The `check-file` rules in `styleHygiene` encode GAIA's folder layout (with
 `sourceDir` substituted for the literal `app/` prefix):
 
-- `<sourceDir>/components/**`: component file naming
-- `<sourceDir>/pages/**`: route/page file naming
-- `<sourceDir>/hooks/**`: hook file naming (`use-*.ts`)
-- `test/**`: test harness naming
+- `<sourceDir>/components/**` — component file naming
+- `<sourceDir>/pages/**` — route/page file naming
+- `<sourceDir>/hooks/**` — hook file naming (`use-*.ts`)
+- `test/**` — test harness naming
 
 For most non-GAIA layouts, passing `sourceDir` to the factory is enough:
 

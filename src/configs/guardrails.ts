@@ -2,7 +2,6 @@ import path from 'node:path';
 import type {Linter} from 'eslint';
 import noRelativeImportPaths from 'eslint-plugin-no-relative-import-paths';
 import sonarjs from 'eslint-plugin-sonarjs';
-import cnConditionalPlugin from '../plugins/cn-conditional.js';
 import noEnumPlugin from '../plugins/no-enum.js';
 import noJsxIifePlugin from '../plugins/no-jsx-iife.js';
 import noNullRenderPlugin from '../plugins/no-null-render.js';
@@ -47,15 +46,6 @@ const buildSonarConfig = (sourceDir: string): Linter.Config[] => [
       'sonarjs/no-hardcoded-credentials': 'off',
       'sonarjs/no-hardcoded-passwords': 'off',
     },
-  },
-];
-
-const cnConditionalConfig: Linter.Config[] = [
-  {
-    files: ['**/*.ts?(x)', '**/*.js?(x)'],
-    name: 'cn-conditional',
-    plugins: {'cn-conditional': cnConditionalPlugin},
-    rules: {'cn-conditional/cn-conditional': 'error'},
   },
 ];
 
@@ -268,7 +258,6 @@ const buildNoRelativeImportPathsConfig = (
 
 export const buildGuardrails = (sourceDir: string): Linter.Config[] => [
   ...buildSonarConfig(sourceDir),
-  ...cnConditionalConfig,
   ...noEnumConfig,
   ...noJsxIifeConfig,
   ...noNullRenderConfig,
