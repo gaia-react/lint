@@ -1,5 +1,6 @@
 import {plugin as shadcnPlugin} from '@shadcn/lint';
 import type {ESLint, Linter} from 'eslint';
+import {RESTRICTED_IMPORT_PATHS} from './restricted-imports.js';
 
 export type GaiaLintShadcnOptions = {
   /**
@@ -98,6 +99,14 @@ const VENDORED_UI_RULES_OFF: Linter.RulesRecord = {
   // input-group.tsx: a `<Button>` className built dynamically. `no-raw-colors`
   // still reads those files.
   'shadcn/require-static-classes': 'off',
+  // shadcn writes `import * as React from 'react'`, which the core rule
+  // reports against the `FC` ban because a namespace import could reach those
+  // names. The block re-declares the shared bans minus the `react` entry
+  // (options replace wholesale across blocks), so the other bans hold.
+  'no-restricted-imports': [
+    'error',
+    {paths: RESTRICTED_IMPORT_PATHS.filter((entry) => entry.name !== 'react')},
+  ],
   // shadcn classes use arbitrary values such as `grid-cols-[auto_1fr]`.
   'shadcn/no-arbitrary-values': 'off',
   // sonner.tsx sets CSS variables through a `style` object.

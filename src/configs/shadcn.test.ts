@@ -346,6 +346,15 @@ describe('vendored-ui exemption', () => {
     }
   });
 
+  it('a namespace react import is allowed in vendored ui and still bans FC elsewhere', async () => {
+    const eslint = defaultLinter();
+    const namespaceImport = "import * as React from 'react';\n\nexport const x = React.version;\n";
+    expect(await lintFile(eslint, namespaceImport, UI_FILE)).not.toContain('no-restricted-imports');
+    expect(await lintFile(eslint, namespaceImport, COMPONENT_FILE)).toContain('no-restricted-imports');
+    const conformImport = "import {parseWithZod} from '@conform-to/zod';\n\nexport const x = parseWithZod;\n";
+    expect(await lintFile(eslint, conformImport, UI_FILE)).toContain('no-restricted-imports');
+  });
+
   it('uiFiles overrides the vendored glob', async () => {
     const eslint = createLinter({uiFiles: ['app/vendor/*.tsx']});
     const ids = await lintFile(eslint, NOT_ARROW, UI_FILE);
