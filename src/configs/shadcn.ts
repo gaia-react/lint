@@ -50,6 +50,8 @@ const VENDORED_UI_RULES_OFF: Linter.RulesRecord = {
   // (hoisted, no runtime effect), e.g. select.tsx.
   '@typescript-eslint/naming-convention': 'off',
   '@typescript-eslint/no-use-before-define': 'off',
+  // toast.tsx re-exports namespace members as `const a = Namespace.a`.
+  '@typescript-eslint/prefer-destructuring': 'off',
   // The useMemo callback in field.tsx is flagged; a stylistic async annotation.
   '@typescript-eslint/promise-function-async': 'off',
   // Tailwind class rewrites would change vendored class strings.
