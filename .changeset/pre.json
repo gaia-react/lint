@@ -5,6 +5,9 @@
     "@gaia-react/lint": "2.3.0"
   },
   "changesets": [
-    "kebab-case-naming-layout"
+    "deps-dead-rules",
+    "kebab-case-naming-layout",
+    "shadcn-token-rules-fc-ban",
+    "stylelint-tailwind-apply"
   ]
 }

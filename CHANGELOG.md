@@ -1,5 +1,23 @@
 # @gaia-react/lint
 
+## 3.0.0-rc.1
+
+### Major Changes
+
+- [#56](https://github.com/gaia-react/lint/pull/56) [`9d48fbc`](https://github.com/gaia-react/lint/commit/9d48fbc94e9407cec9875aa51a862ced82518d28) Thanks [@stevensacks](https://github.com/stevensacks)! - Breaking: importing `FC` or `FunctionComponent` from `react` is now an error everywhere, including test and story files. Type props inline instead: `type ButtonProps = {...}; const Button = ({...}: ButtonProps) => ...`.
+
+  Added: the opt-in `shadcn()` factory bundles `@shadcn/lint` (exact-pinned) so role tokens are the only color vocabulary. It sets `shadcn/no-raw-colors`, `shadcn/require-static-classes`, `shadcn/no-arbitrary-values` and `shadcn/no-inline-styles` to error, `shadcn/no-restyle` to error with `allow: ['layout']`, and `shadcn/no-unknown-classes` off in favor of better-tailwindcss's `no-unknown-classes`. Its vendored-ui block turns Prettier and the house-style rules off for `components/ui/*.tsx` (registry output stays byte-identical to `shadcn add`) while `shadcn/no-raw-colors`, `react-hooks/*` and the other correctness rules stay on, and `components/ui/tests/**` stays fully linted. Spread `...lint.shadcn({ui: '~/components/ui'})` as the last entry, after the full GAIA composition and `...lint.prettier`.
+
+  The `eslint` peer floor rises from `^9.0.0` to `^9.30.0`, which `@shadcn/lint` requires. `@shadcn/lint` also pulls a dev-only copy of the `cn` package.
+
+### Patch Changes
+
+- [#57](https://github.com/gaia-react/lint/pull/57) [`c2e285f`](https://github.com/gaia-react/lint/commit/c2e285f4e228fd3261e0e1d775bb272ac1432366) Thanks [@stevensacks](https://github.com/stevensacks)! - Fixed: an unused `eslint-disable` directive now fails a plain `eslint` run at error severity (`linterOptions.reportUnusedDisableDirectives: 'error'`). The `eslint-comments/no-unused-disable` rule it replaces could never report, so the `@eslint-community/eslint-plugin-eslint-comments` dependency is removed. `unicorn/prefer-set-size` and `unicorn/no-blob-to-file` are now off: under the TypeScript parser they cannot report.
+
+  Updated: minor and patch releases of `eslint-plugin-perfectionist`, `eslint-plugin-playwright`, `eslint-plugin-sonarjs`, `eslint-plugin-storybook` and `eslint-plugin-no-relative-import-paths`.
+
+- [#56](https://github.com/gaia-react/lint/pull/56) [`9d48fbc`](https://github.com/gaia-react/lint/commit/9d48fbc94e9407cec9875aa51a862ced82518d28) Thanks [@stevensacks](https://github.com/stevensacks)! - Fixed: the stylelint config no longer reports every Tailwind `@apply` under `at-rule-prelude-no-invalid`. Stylelint 17's standard config validates at-rule preludes as CSS, and `@apply` takes utility class names, so the rule now ignores `@apply` and still checks every standard at-rule.
+
 ## 3.0.0-rc.0
 
 ### Major Changes
