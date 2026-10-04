@@ -4,5 +4,7 @@
   "initialVersions": {
     "@gaia-react/lint": "2.3.0"
   },
-  "changesets": []
+  "changesets": [
+    "kebab-case-naming-layout"
+  ]
 }
