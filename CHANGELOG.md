@@ -1,5 +1,11 @@
 # @gaia-react/lint
 
+## 3.0.0-rc.0
+
+### Major Changes
+
+- [#54](https://github.com/gaia-react/lint/pull/54) [`fa0b343`](https://github.com/gaia-react/lint/commit/fa0b343b9504756f24591bf12df4d6ed27cb16ef) Thanks [@stevensacks](https://github.com/stevensacks)! - Breaking: the `styleHygiene` naming rules now enforce GAIA's kebab-case layout. Component and page folders are kebab-case, `components/ui/` holds flat kebab-case component files with `tests/` as its only subfolder, a route page is `pages/<path>/page.tsx` exporting `<Name>Page`, and hook files are `use-*.ts`. `canonical/filename-match-exported` applies a kebab transform to component and page `.tsx` files, so `theme-switch/index.tsx` exports `ThemeSwitch`; everywhere else it keeps exact matching. PascalCase component folders and camelCase hook files now fail lint, so rename them before upgrading.
+
 ## 2.3.0
 
 ### Minor Changes
