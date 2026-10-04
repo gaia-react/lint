@@ -8,6 +8,7 @@
     "deps-dead-rules",
     "kebab-case-naming-layout",
     "shadcn-token-rules-fc-ban",
-    "stylelint-tailwind-apply"
+    "stylelint-tailwind-apply",
+    "vendored-ui-prefer-destructuring"
   ]
 }
