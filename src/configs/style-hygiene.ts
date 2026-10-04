@@ -17,6 +17,17 @@ const buildCanonicalConfig = (sourceDir: string): Linter.Config[] => [
     },
   },
   {
+    // Component and page folders are kebab-case while their default export is
+    // PascalCase, so `theme-switch/index.tsx` exports `ThemeSwitch`. Scoped to
+    // these folders only: a global kebab transform would reject `i18n.ts`
+    // exporting `i18n` (lodash kebabs it to `i-18-n`).
+    files: [`${sourceDir}/components/**/*.tsx`, `${sourceDir}/pages/**/*.tsx`],
+    name: 'canonical/filename-match-exported-kebab',
+    rules: {
+      'canonical/filename-match-exported': ['error', {transforms: ['kebab']}],
+    },
+  },
+  {
     files: ['**/*.tsx', '**/hooks/*.ts?(x)'],
     name: 'canonical/sort-react-dependencies',
     rules: {
@@ -27,6 +38,8 @@ const buildCanonicalConfig = (sourceDir: string): Linter.Config[] => [
     files: [
       `${sourceDir}/root.tsx`,
       `${sourceDir}/entry.server.tsx`,
+      // A route page exports `<Name>Page` from `page.tsx`
+      `${sourceDir}/pages/**/page.tsx`,
       `${sourceDir}/**/tests/*`,
       'test/**/*.ts?(x)',
       '**/*.stories.tsx',
@@ -201,6 +214,17 @@ const unusedImportsConfig: Linter.Config[] = [
   },
 ];
 
+// Subfolders a component or page folder may hold besides nested components.
+const RESERVED_FOLDERS = '(assets|hooks|state|tests|utils)';
+
+// The same, plus ui/, whose flat files are not named index.tsx.
+const RESERVED_AND_UI_FOLDERS = '(assets|hooks|state|tests|ui|utils)';
+
+// Matches one folder segment that is not exactly one of `names`. micromatch's
+// `!(a|b)` alone excludes every segment that merely starts with `a` or `b`
+// (`statement` for `state`), so names extending a reserved word are added back.
+const notExactly = (names: string): string => `{!${names},@${names}+([a-z0-9-])}`;
+
 const buildCheckFileConfig = (sourceDir: string): Linter.Config[] => [
   {
     plugins: {
@@ -214,12 +238,19 @@ const buildCheckFileConfig = (sourceDir: string): Linter.Config[] => [
       'check-file/filename-naming-convention': [
         'error',
         {
-          // React hook files must be camelCase (to match the hook name)
-          '**/hooks/*.{ts,tsx}': 'CAMEL_CASE',
+          // React hook files are kebab-case with a `use-` prefix (use-theme.ts)
+          '**/hooks/*.{ts,tsx}': 'use-+([a-z0-9])*(-+([a-z0-9]))',
           [`${sourceDir}/state/*.tsx`]: 'KEBAB_CASE',
-          // React component files must be named index.tsx
-          [`${sourceDir}/{components,pages}/**/!(assets|hooks|state|tests|utils)/*.tsx`]:
+          // Components live in folders, never directly in components/
+          [`${sourceDir}/components/*.tsx`]: '!(*)',
+          // components/ui/ holds flat kebab-case component files (button.tsx)
+          [`${sourceDir}/components/ui/*.tsx`]: 'KEBAB_CASE',
+          // Every other component file is named index.tsx
+          [`${sourceDir}/components/**/${notExactly(RESERVED_AND_UI_FOLDERS)}/*.tsx`]:
             'index+()',
+          // A page folder holds its route page.tsx, or index.tsx for colocated components
+          [`${sourceDir}/pages/**/${notExactly(RESERVED_FOLDERS)}/*.tsx`]:
+            '@(index|page)',
           // Generally, non-component files must be named kebab-case
           [`${sourceDir}/{components,pages}/**/!(hooks)/*.ts`]: 'KEBAB_CASE',
           // Non-component files inside specific components folders must be kebab-case
@@ -241,9 +272,12 @@ const buildCheckFileConfig = (sourceDir: string): Linter.Config[] => [
       'check-file/folder-naming-convention': [
         'error',
         {
-          // enforce PascalCase component folders, and allow assets, hooks, tests, and utils subfolders
-          [`${sourceDir}/components/**/`]:
-            '(assets|hooks|state|tests|utils|[A-Z][a-zA-Z0-9]*)',
+          // enforce kebab-case component and page folders; the reserved
+          // assets, hooks, state, tests, and utils subfolders are kebab-case too
+          [`${sourceDir}/components/**/`]: 'KEBAB_CASE',
+          [`${sourceDir}/pages/**/`]: 'KEBAB_CASE',
+          // components/ui/ is flat: tests/ is its only subfolder
+          [`${sourceDir}/components/ui/*/`]: '@(tests)',
         },
       ],
     },
