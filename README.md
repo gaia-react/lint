@@ -302,12 +302,41 @@ if it exists at the project root; no need to declare it.
 ## GAIA folder conventions baked into `check-file`
 
 The `check-file` rules in `styleHygiene` encode GAIA's folder layout (with
-`sourceDir` substituted for the literal `app/` prefix):
+`sourceDir` substituted for the literal `app/` prefix). Every folder and file
+name is kebab-case:
 
-- `<sourceDir>/components/**`: component file naming
-- `<sourceDir>/pages/**`: route/page file naming
-- `<sourceDir>/hooks/**`: hook file naming (`use-*.ts`)
+```
+<sourceDir>/
+  components/
+    ui/                     flat kebab-case files (button.tsx); tests/ is the only subfolder
+    <name>/index.tsx        one folder per component, default export in PascalCase
+      tests/                index.stories.tsx, index.test.tsx
+      hooks/                use-<name>.ts
+      <sub-name>/index.tsx  nested component
+  pages/
+    <route path>/page.tsx   route page, default export <Name>Page
+      tests/                page.stories.tsx, page.test.tsx
+      <name>/index.tsx      component used only by this page
+  hooks/
+    use-<name>.ts           camelCase export (useTheme)
+    tests/use-<name>.test.ts
+```
+
+- `<sourceDir>/components/**`: kebab-case folders; component files are named
+  `index.tsx`, except the flat `components/ui/` files; no component file sits
+  directly in `components/`
+- `<sourceDir>/pages/**`: kebab-case folders; a `.tsx` file is `page.tsx` or
+  `index.tsx`
+- `**/hooks/*`: hook files are kebab-case with a `use-` prefix (`use-*.ts`)
+- `assets/`, `hooks/`, `state/`, `tests/`, and `utils/` are the reserved
+  subfolders of a component or page folder; files in them are kebab-case
 - `test/**`: test harness naming
+
+`canonical/filename-match-exported` compares a component or page file's
+default export against its kebab-case folder (`theme-switch/index.tsx` exports
+`ThemeSwitch`). Outside `components/` and `pages/` it keeps exact matching, so
+`i18n.ts` exports `i18n`. It is off for `pages/**/page.tsx`, stories, tests,
+routes, and hook files.
 
 For most non-GAIA layouts, passing `sourceDir` to the factory is enough:
 
@@ -315,8 +344,9 @@ For most non-GAIA layouts, passing `sourceDir` to the factory is enough:
 const lint = gaiaLint({sourceDir: 'src'});
 ```
 
-If the convention itself differs (e.g. PascalCase component files instead
-of `index.tsx`), override the relevant `check-file/*` rules **after** the
+If your project uses a different layout (for example, a non-GAIA project
+that names component files in PascalCase, `Button.tsx`, instead of GAIA's
+kebab-case folders with `index.tsx`), override the relevant `check-file/*` rules **after** the
 `styleHygiene` spread:
 
 ```js
@@ -354,6 +384,14 @@ This package follows SemVer.
 - **Major.** Engine swaps (ESLint → Biome), `eslint` major version bumps,
   removal/rename of named exports, default-rule changes that introduce new
   errors in previously-clean code.
+
+## Prereleases
+
+3.0.0 ships first as `3.0.0-rc.N` on the `rc` dist-tag, for GAIA 2.0. Install
+it with `pnpm add -D @gaia-react/lint@rc`. The `latest` dist-tag stays on 2.x
+until GAIA 2.0.0 ships. The Release workflow publishes from `main` only, so a
+2.x hotfix is cut and published manually by the maintainer from the
+`release/2.x` branch.
 
 ## License
 
