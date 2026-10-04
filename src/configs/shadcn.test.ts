@@ -328,6 +328,7 @@ describe('vendored-ui exemption', () => {
     'jsx-a11y/click-events-have-key-events',
     'jsx-a11y/no-noninteractive-element-interactions',
     'shadcn/require-static-classes',
+    '@typescript-eslint/prefer-destructuring',
   ])('%s is off in vendored ui and stays on in ui/tests', async (rule) => {
     const eslint = createLinter(undefined, true);
     expect(await severityOf(eslint, UI_FILE, rule)).toBe(0);
