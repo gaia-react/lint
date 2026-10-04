@@ -1,5 +1,11 @@
 # @gaia-react/lint
 
+## 3.0.0-rc.2
+
+### Patch Changes
+
+- [#59](https://github.com/gaia-react/lint/pull/59) [`3f29c02`](https://github.com/gaia-react/lint/commit/3f29c02f0a8dcc2d357e1071294515d7c5f68fd9) Thanks [@stevensacks](https://github.com/stevensacks)! - Fixed: `@typescript-eslint/prefer-destructuring` is off in vendored shadcn ui files. shadcn's `toast` component re-exports namespace members as `const a = Namespace.a`, which the rule reported on unedited `shadcn add` output.
+
 ## 3.0.0-rc.1
 
 ### Major Changes
