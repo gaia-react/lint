@@ -143,6 +143,12 @@ const unicornConfig: Linter.Config[] = [
       // the narrowing and the value's refined type along with it.
       'unicorn/prefer-includes-over-repeated-comparisons': 'off',
       'unicorn/prefer-set-has': 'off',
+      // Both gate on `definition.kind === 'const'`, which
+      // @typescript-eslint/scope-manager never sets (the `const` lives on
+      // `definition.parent.kind`), so under the TypeScript parser they cannot
+      // report. Off states that instead of implying coverage.
+      'unicorn/no-blob-to-file': 'off',
+      'unicorn/prefer-set-size': 'off',
       'unicorn/prefer-switch': 'off',
       'unicorn/prefer-ternary': 'off',
       'unicorn/prevent-abbreviations': [

@@ -60,11 +60,11 @@ new source root: no per-config override blocks needed.
 
 | Property         | Shape                            | Includes                                                                                                                                          | Required? |
 | ---------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, `eslint-comments`, `prefer-arrow-functions`, lodash/underscore guard, `no-restricted-imports` (bans bare `@conform-to/zod`) | required  |
+| `base`           | `Linter.Config[]`                | JS recommended, TypeScript (typescript-eslint), `import-x`, unused-disable-directive reporting at error, `prefer-arrow-functions`, lodash/underscore guard, `no-restricted-imports` (bans bare `@conform-to/zod`) | required  |
 | `react`          | `Linter.Config[]`                | `eslint-plugin-react`, `react-hooks`, `jsx-a11y`, GAIA-specific React rules                                                                       | required for React apps |
 | `reactRouter`    | `Linter.Config[]`                | Relaxations for React Router framework mode. Spread **after** `react`. See [Router-specific rules](#router-specific-rules)                        | React Router only |
 | `styleHygiene`   | `Linter.Config[]`                | `canonical`, `perfectionist`, `unicorn`, `unused-imports`, `check-file`                                                                           | required  |
-| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `cn-conditional` (custom), `no-relative-import-paths`, `sonarjs`, `eslint-comments`, `import-x`, `prefer-arrow-functions` | required  |
+| `guardrails`     | `Linter.Config[]`                | `no-enum` (custom), `no-switch` (custom), `no-jsx-iife` (custom), `no-null-render` (custom), `no-zod-enum` (custom), `cn-conditional` (custom), `no-relative-import-paths`, `sonarjs`, `import-x`, `prefer-arrow-functions` | required  |
 | `testing`        | `Linter.Config[]`                | Vitest + Testing Library config scoped to `*.test.*` and `test/`                                                                                  | optional  |
 | `storybook`      | `Linter.Config[]`                | `eslint-plugin-storybook` scoped to `*.stories.*` and `.storybook/main.*`                                                                          | optional  |
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `.playwright/`                                                                                                | optional  |
@@ -276,7 +276,7 @@ where your Tailwind entry CSS file lives.
 | Option       | Type       | Required | Description                                                                                  |
 | ------------ | ---------- | -------- | -------------------------------------------------------------------------------------------- |
 | `entryPoint` | `string`   | yes      | Path to your Tailwind entry CSS, used by the plugin to resolve the active class set.         |
-| `ignore`     | `string[]` | no       | Class names the plugin should ignore in `no-unregistered-classes` (e.g. design-system tokens, `plain-*` utility shims). |
+| `ignore`     | `string[]` | no       | Class names the plugin should ignore in `better-tailwindcss/no-unknown-classes` (e.g. design-system tokens, `plain-*` utility shims). |
 
 ## Ignores factory
 
