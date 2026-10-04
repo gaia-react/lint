@@ -10,11 +10,16 @@ import {playwright} from './configs/playwright.js';
 import {prettier} from './configs/prettier.js';
 import {react} from './configs/react.js';
 import {reactRouter} from './configs/react-router.js';
+import {buildShadcn, type GaiaLintShadcnOptions} from './configs/shadcn.js';
 import {storybook} from './configs/storybook.js';
 import {buildStyleHygiene} from './configs/style-hygiene.js';
 import {testing} from './configs/testing.js';
 
-export type {GaiaLintBetterTailwindOptions, GaiaLintIgnoresOptions};
+export type {
+  GaiaLintBetterTailwindOptions,
+  GaiaLintIgnoresOptions,
+  GaiaLintShadcnOptions,
+};
 
 export type GaiaLintOptions = {
   /**
@@ -46,6 +51,12 @@ export type GaiaLintBundle = {
   prettier: Linter.Config[];
   react: Linter.Config[];
   reactRouter: Linter.Config[];
+  /**
+   * Opt-in `@shadcn/lint` token rules plus the vendored-ui exemption. Assumes
+   * the full GAIA composition is spread before it and must be the LAST entry,
+   * after `...lint.prettier`.
+   */
+  shadcn: (opts?: GaiaLintShadcnOptions) => Linter.Config[];
   storybook: Linter.Config[];
   styleHygiene: Linter.Config[];
   testing: Linter.Config[];
@@ -83,6 +94,7 @@ const gaiaLint = (opts?: GaiaLintOptions): GaiaLintBundle => {
     prettier,
     react,
     reactRouter,
+    shadcn: (shadcnOpts) => buildShadcn(sourceDir, shadcnOpts),
     storybook,
     styleHygiene: buildStyleHygiene(sourceDir),
     testing,

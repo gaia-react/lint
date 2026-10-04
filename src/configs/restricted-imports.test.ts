@@ -11,6 +11,7 @@
  * every snippet is linted with a matching virtual filename.
  */
 import {Linter} from 'eslint';
+import tseslint from 'typescript-eslint';
 import {describe, expect, test} from 'vitest';
 import {buildBase} from './base.js';
 import {testing} from './testing.js';
@@ -108,5 +109,63 @@ describe('testing no-restricted-imports composition', () => {
     expect(
       messages.some((message) => message.message.includes('internal')),
     ).toBe(true);
+  });
+});
+
+const lintTs = (
+  code: string,
+  block: Linter.Config,
+  filename: string,
+): Linter.LintMessage[] =>
+  linter.verify(
+    code,
+    [
+      {
+        languageOptions: {
+          ecmaVersion: 'latest',
+          parser: tseslint.parser,
+          sourceType: 'module',
+        },
+      },
+      block,
+    ],
+    filename,
+  );
+
+const FC_CASES: [description: string, code: string][] = [
+  ['import type {FC}', "import type {FC} from 'react';"],
+  ['import {FC}', "import {FC} from 'react';"],
+  [
+    'import type {FunctionComponent}',
+    "import type {FunctionComponent} from 'react';",
+  ],
+];
+
+const FC_TARGETS: [description: string, block: Linter.Config, file: string][] = [
+  ['an app file', baseConformBlock, 'app/x.tsx'],
+  ['a test file', testingBlock, 'app/components/x/tests/index.test.tsx'],
+];
+
+describe('FC and FunctionComponent import ban', () => {
+  describe.each(FC_TARGETS)('in %s', (_description, block, file) => {
+    test.each(FC_CASES)('%s errors with the inline-props replacement', (_name, code) => {
+      const messages = lintTs(code, block, file);
+      expect(messages).toHaveLength(1);
+      expect(messages[0].ruleId).toBe('no-restricted-imports');
+      expect(messages[0].message).toContain('Type the props inline');
+    });
+
+    test('a type import of ReactNode is allowed', () => {
+      expect(lintTs("import type {ReactNode} from 'react';", block, file)).toHaveLength(0);
+    });
+  });
+
+  test('the @conform-to/zod ban survives next to the FC ban on a test file', () => {
+    const messages = lintTs(
+      "import {parseWithZod} from '@conform-to/zod';\nimport type {FC} from 'react';",
+      testingBlock,
+      'app/components/x/tests/index.test.tsx',
+    );
+    expect(messages).toHaveLength(2);
   });
 });

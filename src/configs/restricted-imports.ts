@@ -12,8 +12,18 @@
  * bare `@conform-to/zod` specifier is banned, while the distinct
  * `@conform-to/zod/v4` specifier stays allowed. A `patterns` entry keyed on
  * `@conform-to/zod` would wrongly also catch the `/v4` subpath.
+ *
+ * The `react` entry bans only the `FC` and `FunctionComponent` names
+ * (`importNames`); every other `react` import stays allowed. The core rule
+ * reports type-only specifiers, so `import type {FC}` is caught too.
  */
 export const RESTRICTED_IMPORT_PATHS = [
+  {
+    importNames: ['FC', 'FunctionComponent'],
+    message:
+      "Do not import FC or FunctionComponent from 'react'. Type the props inline: `type ButtonProps = {...}; const Button = ({...}: ButtonProps) => ...`.",
+    name: 'react',
+  },
   {
     message:
       "Import from '@conform-to/zod/v4'. The bare '@conform-to/zod' specifier targets Zod v3 and throws at runtime, uncaught by typecheck, lint, and build.",
