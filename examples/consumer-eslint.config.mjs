@@ -15,4 +15,5 @@ export default defineConfig([
   ...lint.guardrails,
   ...lint.betterTailwind({entryPoint: './app/styles/tailwind.css'}),
   ...lint.prettier,
+  ...lint.shadcn({ui: '~/components/ui'}), // opt-in shadcn/ui token rules; must be the last entry
 ]);

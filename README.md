@@ -31,11 +31,13 @@ export default defineConfig([
   ...lint.guardrails,
   ...lint.betterTailwind({entryPoint: './app/styles/tailwind.css'}),
   ...lint.prettier,
+  ...lint.shadcn({ui: '~/components/ui'}), // opt-in; must be last
 ]);
 ```
 
 Drop the `reactRouter` line if you are not on React Router framework mode.
-See [Router-specific rules](#router-specific-rules).
+See [Router-specific rules](#router-specific-rules). Drop the `shadcn` line if
+you do not use shadcn/ui; see [shadcn factory](#shadcn-factory).
 
 ## Factory options
 
@@ -69,6 +71,7 @@ new source root: no per-config override blocks needed.
 | `storybook`      | `Linter.Config[]`                | `eslint-plugin-storybook` scoped to `*.stories.*` and `.storybook/main.*`                                                                          | optional  |
 | `playwright`     | `Linter.Config[]`                | `eslint-plugin-playwright` scoped to `.playwright/`                                                                                                | optional  |
 | `prettier`       | `Linter.Config[]`                | `eslint-config-prettier`, must be **last** to disable formatting rules                                                                           | required if using Prettier |
+| `shadcn`         | `(opts?) => Linter.Config[]`     | `@shadcn/lint` token rules plus the vendored-ui exemption; see [shadcn factory](#shadcn-factory). Spread **last**, after `prettier`, with the full GAIA composition before it | optional  |
 | `betterTailwind` | `(opts) => Linter.Config[]`      | `eslint-plugin-better-tailwindcss` factory; takes `entryPoint` (path to Tailwind entry CSS) and optional `ignore` (class names to skip)           | optional  |
 | `ignores`        | `Iterable<Linter.Config> & ((opts?) => Linter.Config[])` | `includeIgnoreFile` helper plus GAIA defaults. Spread directly for defaults (`...lint.ignores`) or call with options to override (`...lint.ignores({extra: ['.gaia/**']})`). | recommended |
 
@@ -139,7 +142,7 @@ have to install or upgrade them individually.
 
 Supported versions:
 
-- `eslint ^9.0.0`
+- `eslint ^9.30.0` (`@shadcn/lint` needs 9.30 or later)
 - `prettier ^3.0.0`
 - `typescript ^5.0.0 || ^6.0.0`
 
@@ -277,6 +280,75 @@ where your Tailwind entry CSS file lives.
 | ------------ | ---------- | -------- | -------------------------------------------------------------------------------------------- |
 | `entryPoint` | `string`   | yes      | Path to your Tailwind entry CSS, used by the plugin to resolve the active class set.         |
 | `ignore`     | `string[]` | no       | Class names the plugin should ignore in `better-tailwindcss/no-unknown-classes` (e.g. design-system tokens, `plain-*` utility shims). |
+
+## shadcn factory
+
+`shadcn()` bundles [`@shadcn/lint`](https://github.com/shadcn-ui/lint) (an
+exact-pinned dependency) so role tokens are the only color vocabulary, and
+exempts the vendored shadcn ui files from house style. It is opt-in: omit it
+and nothing shadcn-related loads.
+
+```js
+...lint.shadcn({ui: '~/components/ui'}), // the LAST entry, after ...lint.prettier
+```
+
+| Option            | Type       | Default                                | Description                                                                                                                           |
+| ----------------- | ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `ui`              | `string`   | `'~/components/ui'`                    | Import alias of the vendored ui folder, written to the root-level `settings.shadcn.ui` (never a rule option).                         |
+| `uiFiles`         | `string[]` | `[`${sourceDir}/components/ui/*.tsx`]` | Globs of the vendored ui files. Never matches `ui/tests/**`.                                                                          |
+| `restyleOffFiles` | `string[]` | `[]`                                   | Fallback: globs outside ui where `shadcn/no-restyle` is off. Its block always ignores `${sourceDir}/components/ui/**`, so `ui/tests/**` stays covered. |
+
+Blocks it returns:
+
+- `shadcn/settings`: no `files`; registers the plugin and sets `settings.shadcn.ui`.
+- `shadcn/rules`: source files. `shadcn/no-raw-colors`, `shadcn/require-static-classes`,
+  `shadcn/no-arbitrary-values` and `shadcn/no-inline-styles` are `error`;
+  `shadcn/no-restyle` is `['error', {allow: ['layout']}]`; `shadcn/no-unknown-classes`
+  is `off` because `better-tailwindcss/no-unknown-classes` (from `betterTailwind`)
+  stays the only unknown-class rule. A marker class a library applies, such as
+  sonner's `toaster`, is cleared through `betterTailwind({ignore: ['toaster']})`.
+- `shadcn/vendored-ui`: the `uiFiles` only. See below.
+- `shadcn/restyle-fallback`: only when `restyleOffFiles` is non-empty.
+
+**Ordering.** The vendored-ui block turns off rules owned by plugins the other
+GAIA blocks register (prettier, prefer-arrow-functions, perfectionist, unicorn,
+better-tailwindcss, and more), so `shadcn()` assumes the full GAIA composition
+is spread before it. Spread it last, after `...lint.prettier`, so its
+`prettier/prettier: off` wins on vendored files.
+
+### Vendored ui policy
+
+Files in `components/ui/*.tsx` are registry output kept byte-identical to
+`shadcn add`. For them Prettier and the house-style rules are off, so lint
+never rewrites a vendored file: `prettier/prettier`, `@stylistic/quotes`,
+`prefer-arrow-functions`, the `perfectionist` sort rules, `canonical`,
+`unicorn/prevent-abbreviations`, `sonarjs/prefer-read-only-props`, the
+better-tailwindcss canonical and shorthand rewrites, naming rules and the
+other style rules the registry output trips, plus `shadcn/no-arbitrary-values`,
+`shadcn/no-inline-styles` and `shadcn/no-restyle`. Seven correctness-class
+rules the shadcn source itself trips are also off there, each commented in the
+block: `@typescript-eslint/no-unnecessary-condition`, `eqeqeq`,
+`react/no-array-index-key`, `jsx-a11y/label-has-associated-control`,
+`jsx-a11y/click-events-have-key-events`,
+`jsx-a11y/no-noninteractive-element-interactions` and
+`shadcn/require-static-classes`.
+
+Everything else stays on in vendored ui: `shadcn/no-raw-colors`, `react-hooks/*`,
+and every other correctness rule. `components/ui/tests/**` is GAIA-authored and
+stays fully linted. If a registry item you add trips a house-style rule not in
+the list, extend the block rather than editing the vendored file.
+
+## `FC` and `FunctionComponent` are banned
+
+Importing `FC` or `FunctionComponent` from `'react'` is an error everywhere,
+including test and story files (a core `no-restricted-imports` entry in the
+shared path list). Type props inline instead:
+
+```tsx
+type ButtonProps = {label: string};
+
+const Button = ({label}: ButtonProps) => <button>{label}</button>;
+```
 
 ## Ignores factory
 

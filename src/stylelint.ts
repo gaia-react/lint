@@ -18,6 +18,9 @@ const config: Config = {
   plugins: ['stylelint-order'],
   rules: {
     'at-rule-no-deprecated': null,
+    // stylelint-config-standard validates at-rule preludes as CSS; Tailwind's
+    // @apply takes utility class names, which never parse as a valid prelude
+    'at-rule-prelude-no-invalid': [true, {ignoreAtRules: ['apply']}],
     'no-descending-specificity': null,
     'selector-pseudo-class-no-unknown': [
       true,
