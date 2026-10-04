@@ -1,4 +1,3 @@
-import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import js from '@eslint/js';
 import {configs, plugins, rules} from 'eslint-config-airbnb-extended';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
@@ -241,16 +240,15 @@ const buildImportXConfig = (sourceDir: string): Linter.Config[] => [
   },
 ];
 
-const eslintCommentsConfig: Linter.Config[] = [
+// ESLint's built-in directive check, at error so an unused disable fails a
+// plain `eslint` run, not only one with `--max-warnings=0`. The eslint-comments
+// plugin's `no-unused-disable` cannot stand in for it: it looks its severity up
+// under the `@eslint-community/eslint-comments/` prefix, so registered under any
+// other plugin name it never reports.
+const unusedDisableDirectivesConfig: Linter.Config[] = [
   {
-    name: 'eslint-comments',
-    plugins: {
-      'eslint-comments': eslintComments,
-    },
-    rules: {
-      'eslint-comments/disable-enable-pair': 'off',
-      'eslint-comments/no-unused-disable': 'error',
-    },
+    linterOptions: {reportUnusedDisableDirectives: 'error'},
+    name: 'gaia/unused-disable-directives',
   },
 ];
 
@@ -369,7 +367,7 @@ export const buildBase = (sourceDir: string): Linter.Config[] => [
   ...typescriptConfig,
   ...buildTsEslintConfig(sourceDir),
   ...buildImportXConfig(sourceDir),
-  ...eslintCommentsConfig,
+  ...unusedDisableDirectivesConfig,
   ...preferArrowFunctionsConfig,
   ...restrictedSyntaxConfig,
   ...restrictedImportsConfig,
