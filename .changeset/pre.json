@@ -6,6 +6,8 @@
   },
   "changesets": [
     "deps-dead-rules",
+    "deps-refresh-oct",
+    "drop-testing-library",
     "kebab-case-naming-layout",
     "shadcn-token-rules-fc-ban",
     "stylelint-tailwind-apply",
