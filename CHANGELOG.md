@@ -1,5 +1,15 @@
 # @gaia-react/lint
 
+## 3.0.0-rc.3
+
+### Major Changes
+
+- [#61](https://github.com/gaia-react/lint/pull/61) [`1d66414`](https://github.com/gaia-react/lint/commit/1d6641435c3ea87c4c3d85319c04caae2c57cd1e) Thanks [@stevensacks](https://github.com/stevensacks)! - Removed: the `testing-library` block and the `eslint-plugin-testing-library` dependency. GAIA tests run in Vitest browser mode (`vitest-browser-react`, `page` locators), where Testing Library's rules no longer apply and `prefer-screen-queries` false-positives on `page.getByRole`. Delete any `eslint-disable` comments that name a `testing-library/*` rule. The jest-dom rules stay, because stories still assert with the jest-dom matchers that `storybook/test` re-exports.
+
+### Patch Changes
+
+- [#61](https://github.com/gaia-react/lint/pull/61) [`1d66414`](https://github.com/gaia-react/lint/commit/1d6641435c3ea87c4c3d85319c04caae2c57cd1e) Thanks [@stevensacks](https://github.com/stevensacks)! - Updated: `eslint-config-airbnb-extended` to 3.3.0, `eslint-plugin-sonarjs` to 4.2.2 and `eslint-plugin-storybook` to 10.6.1. Refreshed the lockfile, which picks up patched transitive releases and clears most `pnpm audit` advisories. The dependency release-age window drops from 7 days to 3, matching GAIA.
+
 ## 3.0.0-rc.2
 
 ### Patch Changes
