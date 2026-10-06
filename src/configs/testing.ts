@@ -1,6 +1,5 @@
 import vitest from '@vitest/eslint-plugin';
 import jestDom from 'eslint-plugin-jest-dom';
-import testingLibrary from 'eslint-plugin-testing-library';
 import {RESTRICTED_IMPORT_PATHS} from './restricted-imports.js';
 import type {Linter} from 'eslint';
 
@@ -8,8 +7,8 @@ import type {Linter} from 'eslint';
  * Testing flat-config block.
  *
  * Ports `testHarnessConfig` + `testingLibraryConfig` from GAIA's
- * `eslint.config.mjs`. Wires up Vitest, jest-dom, and Testing Library
- * recommended rules across test/story/test-harness files.
+ * `eslint.config.mjs`. Wires up Vitest and jest-dom recommended rules
+ * across test/story/test-harness files.
  */
 export const testing: Linter.Config[] = [
   {
@@ -141,10 +140,5 @@ export const testing: Linter.Config[] = [
         },
       ],
     },
-  },
-  {
-    ...testingLibrary.configs['flat/react'],
-    files: ['**/*.test.ts?(x)'],
-    name: 'testing-library',
   },
 ];
